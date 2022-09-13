@@ -132,6 +132,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerController: {fileID: 8184158114043612033}
+  playerInput: {fileID: 8184158114043612063}
+  dugMaterial: {fileID: 2100000, guid: 02bdceb142a48c94e9403e017b1292e8, type: 2}
   speed: 4
   gravity: -5
 --- !u!114 &8184158114043612063
