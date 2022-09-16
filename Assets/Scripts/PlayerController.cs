@@ -6,6 +6,9 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField]
+    private Transform mainCamera;
+
+    [SerializeField]
     private CharacterController playerController;
 
     [SerializeField]
@@ -19,6 +22,8 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     private float gravity = 5f;
+
+    private Vector3 input;
 
     private Vector3 velocity;
 
@@ -39,10 +44,21 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Updates player movement
+    /// Updates player movement relative to the camera
     /// </summary>
     private void UpdateMovement()
     {
+        // Calculates velocity based on the camera's current rotation and input vector
+        velocity = mainCamera.rotation * input;
+        velocity.y = 0f;
+
+        // Rotates player to face the velocity/move direction
+        if (input.magnitude > 0)
+        {
+            transform.rotation = Quaternion.LookRotation(velocity);
+        }
+
+        // Moves the player
         playerController.Move(velocity * Time.deltaTime * speed);
     }
 
@@ -52,7 +68,8 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnMovement(InputValue value)
     {
-        velocity = new Vector3(value.Get<Vector2>().x, 0f, value.Get<Vector2>().y);
+        // Set input vector
+        input = new Vector3(value.Get<Vector2>().x, 0f, value.Get<Vector2>().y);
     }
 
     /// <summary>
@@ -92,6 +109,45 @@ public class PlayerController : MonoBehaviour
 
         // Wait for dig animation to finish, currently has a placeholder for time
         yield return new WaitForSeconds(2f);
+
+        // Enable player input
+        playerInput.actions.Enable();
+    }
+
+    /// <summary>
+    /// Shove/Push an object one unit in the direction the player is facing
+    /// </summary>
+    /// <param name="value"></param>
+    private void OnShove(InputValue value)
+    {
+        RaycastHit hit;
+        Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - 0.49f, transform.position.z);
+        if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 0.99f))
+        {
+            // Draws a ray for debugging
+            Debug.DrawRay(transformPositionHeightOffset, transform.forward * hit.distance, Color.yellow);
+
+            if (hit.collider.gameObject.tag == "Shovable")
+            {
+                hit.collider.transform.Translate(transform.forward);
+                StartCoroutine("ShoveAction");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Restricts player input while the player's shove animation is playing
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator ShoveAction()
+    {
+        // Disable player input
+        playerInput.actions.Disable();
+
+        // TODO: Start shove animation when animation is imported and implemented
+
+        // Wait for shove animation to finish, currently has a placeholder for time
+        yield return new WaitForSeconds(1f);
 
         // Enable player input
         playerInput.actions.Enable();
