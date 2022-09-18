@@ -107,6 +107,9 @@ public class PlayerController : MonoBehaviour
 
         // TODO: Start dig animation when animation is imported and implemented
 
+        //TODO: play dig sound, move this somewhere else?
+        //SoundManager.PlaySound();
+
         // Wait for dig animation to finish, currently has a placeholder for time
         yield return new WaitForSeconds(2f);
 
