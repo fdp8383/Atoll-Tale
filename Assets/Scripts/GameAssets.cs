@@ -4,26 +4,27 @@ using UnityEngine;
 
 public class GameAssets : MonoBehaviour
 {
-    private static GameAssets _i;
-    public List<AudioClip> audioClips;
-    public Dictionary<string, AudioClip> soundLibrary;
+    public static GameAssets instance;
+    public List<SoundAudioClip> audioClips;
 
-    public static GameAssets Instance 
+    private void Awake()
     {
-        get 
+        //set up singleton instance
+        if (instance != null)
         {
-            if (_i == null) _i = (Instantiate(Resources.Load("GameAssets")) as GameObject).GetComponent<GameAssets>();
-            return _i;
+            Destroy(this);
+        }
+        else
+        {
+            instance = this;
         }
     }
 
-    private void Start()
+    [System.Serializable]
+    public class SoundAudioClip
     {
-        //add sound clips to library
-        soundLibrary = new Dictionary<string, AudioClip>();
-        for(int i = 0; i < audioClips.Count; i++)
-        {
-            soundLibrary.Add(audioClips[i].name, audioClips[i]);
-        }
+        public SoundManager.Sound sound;
+        public AudioClip audioClip;
     }
+
 }
