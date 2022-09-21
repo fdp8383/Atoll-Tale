@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Shovable
+  - Ground
   layers:
   - Default
   - TransparentFX

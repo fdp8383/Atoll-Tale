@@ -116,6 +116,7 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>
     /// Shove/Push an object one unit in the direction the player is facing
+    /// There is some extra logic and math involved due to relative movement
     /// </summary>
     /// <param name="value"></param>
     private void OnShove(InputValue value)
@@ -127,10 +128,48 @@ public class PlayerController : MonoBehaviour
             // Draws a ray for debugging
             Debug.DrawRay(transformPositionHeightOffset, transform.forward * hit.distance, Color.yellow);
 
+            // If the collider is shovable, initialize variables used for shoving
             if (hit.collider.gameObject.tag == "Shovable")
             {
-                hit.collider.transform.Translate(transform.forward);
-                StartCoroutine("ShoveAction");
+                ShovableObject shovableObject;
+                Vector3 targetPosition = hit.collider.transform.position;
+                Vector3 playerForward = transform.forward;
+                Debug.Log(playerForward);
+
+                if (shovableObject = hit.collider.GetComponent<ShovableObject>())
+                {
+                    // Checks if the player is moving more in the x or z direction
+                    if (Mathf.Abs(playerForward.x) > Mathf.Abs(playerForward.z))
+                    {
+                        // If the player is moving more in the x direction, check if positive or negative
+                        // and update target position accordingly
+                        if (playerForward.x > 0)
+                        {
+                            targetPosition.x += 1;
+                        }
+                        else
+                        {
+                            targetPosition.x -= 1;  
+                        }
+                    }
+                    // If the player is moving more in the z direction, check if positive or negative
+                    // and update target position accordingly
+                    else
+                    {
+                        if (playerForward.z > 0)
+                        {
+                            targetPosition.z+= 1;
+                        }
+                        else
+                        {
+                            targetPosition.z -= 1;
+                        }
+                    }
+
+                    // Call the shove method on the shovable object and start the ShoveAction coroutine
+                    shovableObject.Shove(transform.forward, targetPosition);
+                    StartCoroutine("ShoveAction");
+                }
             }
         }
     }

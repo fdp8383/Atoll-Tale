@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4903481015662170862}
   - component: {fileID: 4903481015662170857}
   - component: {fileID: 4903481015662170856}
+  - component: {fileID: 7259223976601382385}
   m_Layer: 0
   m_Name: ShovableObjectPlaceholder
   m_TagString: Shovable
@@ -97,3 +98,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7259223976601382385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4903481015662170859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bc46a409552d5a46879fc2fc08d68c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnLocation: {x: 0, y: 0, z: 0}
+  gravitySpeed: 5
+  playerTransform: {fileID: 0}
+  rb: {fileID: 0}
