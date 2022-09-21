@@ -134,10 +134,15 @@ public class PlayerController : MonoBehaviour
                 ShovableObject shovableObject;
                 Vector3 targetPosition = hit.collider.transform.position;
                 Vector3 playerForward = transform.forward;
-                Debug.Log(playerForward);
+                //Debug.Log(playerForward);
 
                 if (shovableObject = hit.collider.GetComponent<ShovableObject>())
                 {
+                    if (shovableObject.beingShoved)
+                    {
+                        return;
+                    }
+
                     // Checks if the player is moving more in the x or z direction
                     if (Mathf.Abs(playerForward.x) > Mathf.Abs(playerForward.z))
                     {
@@ -168,6 +173,7 @@ public class PlayerController : MonoBehaviour
 
                     // Call the shove method on the shovable object and start the ShoveAction coroutine
                     shovableObject.Shove(transform.forward, targetPosition);
+                    Debug.Log(targetPosition);
                     StartCoroutine("ShoveAction");
                 }
             }

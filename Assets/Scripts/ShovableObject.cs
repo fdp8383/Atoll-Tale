@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ShovableObject : MonoBehaviour
 {
-    private bool beingShoved = false;
+    public bool beingShoved = false;
 
     private bool isFalling = false;
 
@@ -42,14 +42,21 @@ public class ShovableObject : MonoBehaviour
         {
             transform.position = Vector3.SmoothDamp(transform.position, shoveTargetLocation, ref shoveDirection, 0.3f);
 
-            // If this object has reached its location, it should no longer be in the shoved state
-            if (transform.position == shoveTargetLocation)
+            // If this object has reached its location (or very close to it), it should no longer be in the shoved state
+            if (Vector3.Distance(transform.position, shoveTargetLocation) < 0.05f)
             {
+                // Snap the object to the target location to keep it on the grid
+                transform.position = shoveTargetLocation;
+
+                // Set beingShoved to false
                 beingShoved = false;
+
+                Debug.Log("Got to shove location");
 
                 // If there is no ground under the object start falling
                 if (!CheckGround())
                 {
+                    Debug.Log("Checking for ground");
                     isFalling = true;
                 }
             }
@@ -57,7 +64,10 @@ public class ShovableObject : MonoBehaviour
 
         // If the object is falling, apply gravity
         if (isFalling)
-         {
+        {
+
+            Debug.Log("Falling");
+
              // Start applying gravity
              transform.position += Vector3.down * gravitySpeed * Time.deltaTime;
 
@@ -79,7 +89,7 @@ public class ShovableObject : MonoBehaviour
                  // The object is no longer in a falling state
                  isFalling = false;
              }
-         }
+        }
     }
 
     /// <summary>
@@ -124,11 +134,12 @@ public class ShovableObject : MonoBehaviour
     /// <returns></returns>
     private bool IsPlayerAtSpawnPoint()
     {
+        // Use box collision method to check if player is within bounds of this object's spawn location
         Vector3 playerPosition = playerTransform.position;
-        if (playerPosition.x >= spawnLocation.x - 0.5f &&
-            playerPosition.x <= spawnLocation.x + 0.5f &&
-            playerPosition.z >= spawnLocation.z - 0.5f &&
-            playerPosition.z <= spawnLocation.z + 0.5f)
+        if (playerPosition.x + 0.5f >= spawnLocation.x - 0.5f &&
+            playerPosition.x  - 0.5f<= spawnLocation.x + 0.5f &&
+            playerPosition.z + 0.5f >= spawnLocation.z - 0.5f &&
+            playerPosition.z - 0.5f <= spawnLocation.z + 0.5f)
         {
             return true;
         }
