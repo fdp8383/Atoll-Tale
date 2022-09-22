@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Shovable
   - Ground
+  - Interactable
   layers:
   - Default
   - TransparentFX

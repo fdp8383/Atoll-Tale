@@ -27,6 +27,8 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 velocity;
 
+    private InteractableObject currentInteractable;
+
     // Start is called before the first frame update
     private void Start()
     {
@@ -196,5 +198,74 @@ public class PlayerController : MonoBehaviour
 
         // Enable player input
         playerInput.actions.Enable();
+    }
+
+    /// <summary>
+    /// Interacts with an interactable object if possible
+    /// </summary>
+    /// <param name="value"></param>
+    private void OnInteract(InputValue value)
+    {
+        // If there is a current interactable object stored
+        if (currentInteractable)
+        {
+            // And the interactable object has not been interacted with already
+            if (!currentInteractable.GetHasBeenInteracted())
+            {
+                // Call the interactable object's interaction method
+                currentInteractable.DoInteraction();
+            }
+            // Otherwise the interactable object has already been interacted with
+            else
+            {
+                Debug.Log("Interactable object has already been interacted with");
+            }
+        }
+        // Otherwise there is no interactable object in range
+        else
+        {
+            Debug.Log("No interactable object in range");
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // If the object collided is an interactable object, set it as the current interactable object since we are in range
+        if (other.gameObject.tag == "Interactable")
+        {
+            // Checks if there is an InteractableObject script
+            InteractableObject interactable = other.GetComponent<InteractableObject>();
+            if (interactable)
+            {
+                currentInteractable = interactable;
+                Debug.Log("Interactable object stored");
+            }
+            else
+            {
+                Debug.LogError("Interactable object is missing an InteractableObject script");
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        // If the object collided is an interactable object, clear the current interactable object since we are out of range
+        if (other.gameObject.tag == "Interactable")
+        {
+            // Checks if there is an InteractableObject script
+            InteractableObject interactable = other.GetComponent<InteractableObject>();
+            if (interactable)
+            {
+                if (currentInteractable == interactable)
+                {
+                    currentInteractable = null;
+                    Debug.Log("Interactable object removed");
+                }
+            }
+            else
+            {
+                Debug.LogError("Interactable object is missing an InteractableObject script");
+            }
+        }
     }
 }
