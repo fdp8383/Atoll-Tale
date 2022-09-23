@@ -103,8 +103,11 @@ public class ShovableObject : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(transform.position, shoveDirection, out hit, 1.0f))
         {
-            Debug.Log("Cannot be shoved, there is an object in the way");
-            return;
+            if (hit.collider.tag != "InvisibleBoundsWall")
+            {
+                Debug.Log("Cannot be shoved, there is an object in the way");
+                return;
+            }
         }
 
         beingShoved = true;

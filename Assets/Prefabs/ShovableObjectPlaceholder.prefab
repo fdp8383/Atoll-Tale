@@ -110,7 +110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bc46a409552d5a46879fc2fc08d68c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  beingShoved: 0
   spawnLocation: {x: 0, y: 0, z: 0}
   gravitySpeed: 5
   playerTransform: {fileID: 0}
-  rb: {fileID: 0}
