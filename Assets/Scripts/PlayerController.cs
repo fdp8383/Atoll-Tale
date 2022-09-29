@@ -6,6 +6,9 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField]
+    private GameManager gameManager;
+
+    [SerializeField]
     private Transform mainCamera;
 
     [SerializeField]
@@ -32,6 +35,12 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+        // If there is no game manager stored, find the game manager
+        if (!gameManager)
+        {
+            gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        }
+
         // If there is no player controller stored, find the player controller component on the player
         if (!playerController)
         {
@@ -87,13 +96,37 @@ public class PlayerController : MonoBehaviour
             // Draws a ray for debugging
             Debug.DrawRay(transform.position, Vector3.down * hit.distance, Color.red);
 
-            // Checks if current object has already been dug by checking the current material
-            Renderer rend = hit.collider.GetComponent<Renderer>();
-            if (rend.sharedMaterial.name != dugMaterial.name)
+            if (hit.collider.tag == "Ground" || hit.collider.tag == "GroundTreasure")
             {
-                // Set current material to the dug material and start the dig action coroutine
-                rend.sharedMaterial = dugMaterial;
-                StartCoroutine("DigAction");
+                // Checks if current object has already been dug by checking the current material
+                Renderer rend = hit.collider.GetComponent<Renderer>();
+                if (rend.sharedMaterial.name != dugMaterial.name)
+                {
+                    // If the ground block has treasure, dig up the treasure
+                    if (hit.collider.tag == "GroundTreasure")
+                    {
+                        // Checks for GroundTreasure script
+                        GroundTreasure groundTreasure;
+                        if (groundTreasure = hit.collider.GetComponent<GroundTreasure>())
+                        {
+                            // Calculates the target position to move the treasure chest to and calls the DigUpTreasure method
+                            // on the ground treasure object
+                            Vector3 treasurePosition = hit.collider.transform.position;
+                            treasurePosition.y += 1;
+                            treasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
+                            groundTreasure.DigUpTreasure(treasurePosition);
+                            gameManager.AddToPlayerGold(1);
+                        }
+                        else
+                        {
+                            Debug.LogError("There is no GroundTreasure script on ground trasure object");
+                        }
+                    }
+
+                    // Set current material to the dug material and start the dig action coroutine
+                    rend.sharedMaterial = dugMaterial;
+                    StartCoroutine("DigAction");
+                }
             }
         }
     }
@@ -134,8 +167,6 @@ public class PlayerController : MonoBehaviour
             if (hit.collider.gameObject.tag == "Shovable")
             {
                 ShovableObject shovableObject;
-                Vector3 targetPosition = hit.collider.transform.position;
-                Vector3 playerForward = transform.forward;
                 //Debug.Log(playerForward);
 
                 if (shovableObject = hit.collider.GetComponent<ShovableObject>())
@@ -145,33 +176,8 @@ public class PlayerController : MonoBehaviour
                         return;
                     }
 
-                    // Checks if the player is moving more in the x or z direction
-                    if (Mathf.Abs(playerForward.x) > Mathf.Abs(playerForward.z))
-                    {
-                        // If the player is moving more in the x direction, check if positive or negative
-                        // and update target position accordingly
-                        if (playerForward.x > 0)
-                        {
-                            targetPosition.x += 1;
-                        }
-                        else
-                        {
-                            targetPosition.x -= 1;  
-                        }
-                    }
-                    // If the player is moving more in the z direction, check if positive or negative
-                    // and update target position accordingly
-                    else
-                    {
-                        if (playerForward.z > 0)
-                        {
-                            targetPosition.z+= 1;
-                        }
-                        else
-                        {
-                            targetPosition.z -= 1;
-                        }
-                    }
+                    // Calculate target position on grid
+                    Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 1);
 
                     // Call the shove method on the shovable object and start the ShoveAction coroutine
                     shovableObject.Shove(transform.forward, targetPosition);
@@ -267,5 +273,47 @@ public class PlayerController : MonoBehaviour
                 Debug.LogError("Interactable object is missing an InteractableObject script");
             }
         }
+    }
+
+    /// <summary>
+    /// Calculates the position on the grid in front of the player
+    /// This method is used to move objects in front of the player
+    /// </summary>
+    /// <param name="objectPosition">The current position of the object to move</param>
+    /// <param name="unitsToMove">The number of units to offset the position by</param>
+    /// <returns></returns>
+    private Vector3 CalculateGridPositionInFrontOfPlayer(Vector3 objectPosition, int unitsToMove)
+    {
+        Vector3 playerForward = transform.forward;
+
+        // Checks if the player is moving more in the x or z direction
+        if (Mathf.Abs(playerForward.x) > Mathf.Abs(playerForward.z))
+        {
+            // If the player is moving more in the x direction, check if positive or negative
+            // and update target position accordingly
+            if (playerForward.x > 0)
+            {
+                objectPosition.x += unitsToMove;
+            }
+            else
+            {
+                objectPosition.x -= unitsToMove;
+            }
+        }
+        // If the player is moving more in the z direction, check if positive or negative
+        // and update target position accordingly
+        else
+        {
+            if (playerForward.z > 0)
+            {
+                objectPosition.z += unitsToMove;
+            }
+            else
+            {
+                objectPosition.z -= unitsToMove;
+            }
+        }
+
+        return objectPosition;
     }
 }

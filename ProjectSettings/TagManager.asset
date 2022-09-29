@@ -8,6 +8,7 @@ TagManager:
   - Ground
   - Interactable
   - InvisibleBoundsWall
+  - GroundTreasure
   layers:
   - Default
   - TransparentFX
