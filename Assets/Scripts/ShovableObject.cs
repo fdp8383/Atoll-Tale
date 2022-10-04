@@ -71,6 +71,12 @@ public class ShovableObject : MonoBehaviour
              // Start applying gravity
              transform.position += Vector3.down * gravitySpeed * Time.deltaTime;
 
+            RaycastHit hit;
+            if(Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), Vector3.down, out hit, 0.5f))
+            {
+                isFalling = false;
+            }
+
              // Reset this object to its spawn location if it fell off the level
              if (transform.position.y < -20.0f)
              {
