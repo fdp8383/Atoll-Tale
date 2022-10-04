@@ -9,6 +9,8 @@ TagManager:
   - Interactable
   - InvisibleBoundsWall
   - GroundTreasure
+  - Enemy
+  - Projectile
   layers:
   - Default
   - TransparentFX

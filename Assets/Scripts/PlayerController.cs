@@ -215,8 +215,6 @@ public class PlayerController : MonoBehaviour
             if (hit.collider.gameObject.tag == "Shovable")
             {
                 ShovableObject shovableObject;
-                //Debug.Log(playerForward);
-
                 if (shovableObject = hit.collider.GetComponent<ShovableObject>())
                 {
                     if (shovableObject.beingShoved)
@@ -229,10 +227,35 @@ public class PlayerController : MonoBehaviour
 
                     // Call the shove method on the shovable object and start the ShoveAction coroutine
                     shovableObject.Shove(transform.forward, targetPosition);
-                    Debug.Log(targetPosition);
                     StartCoroutine("ShoveAction");
                 }
             }
+            else if (hit.collider.gameObject.tag == "Projectile")
+            {
+                ReflectProjectile(hit.collider.gameObject);
+            }
+        }
+        else if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
+        {
+            if (hit.collider.gameObject.tag == "Projectile")
+            {
+                ReflectProjectile(hit.collider.gameObject);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="projectile"></param>
+    private void ReflectProjectile(GameObject projectile)
+    {
+        EnemyCannonball enemyCannonball;
+        if (enemyCannonball = projectile.GetComponent<EnemyCannonball>())
+        {
+            Vector3 targetVelocity = CalculateGridPositionInFrontOfPlayer(Vector3.zero, 1);
+            enemyCannonball.SetVelocity(targetVelocity);
+            StartCoroutine("ShoveAction");
         }
     }
 
