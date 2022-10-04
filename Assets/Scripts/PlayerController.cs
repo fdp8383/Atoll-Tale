@@ -24,11 +24,20 @@ public class PlayerController : MonoBehaviour
     private float speed = 5f;
 
     [SerializeField]
-    private float gravity = 5f;
+    private float gravity = -9.81f;
 
     private Vector3 input;
 
     private Vector3 velocity;
+
+    private float verticalVelocity;
+
+    private bool startJump = false;
+    private bool isJumping = false;
+    private bool successfulJump = false;
+
+    [SerializeField]
+    private float heightOffset = 0.49f;
 
     private InteractableObject currentInteractable;
 
@@ -60,8 +69,8 @@ public class PlayerController : MonoBehaviour
     private void UpdateMovement()
     {
         // Calculates velocity based on the camera's current rotation and input vector
-        velocity = mainCamera.rotation * input;
-        velocity.y = 0f;
+        velocity = mainCamera.rotation * input * speed;
+        velocity.y = 0.0f;
 
         // Rotates player to face the velocity/move direction
         if (input.magnitude > 0)
@@ -69,8 +78,44 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.LookRotation(velocity);
         }
 
+        // Set default vertical velocity to -0.5f so playerController.IsGrounded check works properly
+        velocity.y = -0.5f;
+
+        // If player is having a successful jump, move forward
+        if (isJumping && successfulJump)
+        {
+            velocity += transform.forward;
+        }
+
+        // Start jump logic is meant to ensure the player's jump logic runs once before a isGrounded check
+        // overwrites the isJumping bool
+        if (startJump)
+        {
+            startJump = false;
+            isJumping = true;
+            verticalVelocity += gravity * Time.deltaTime;
+            velocity.y += verticalVelocity;
+        }
+        // Once the startJump logic has run once, do normal ground check
+        else
+        {
+            // If player is grounded, set isJumping to false and add no vertical velocity to y axis
+            if (playerController.isGrounded)
+            {
+                isJumping = false;
+                //Debug.Log("Grounded");
+            }
+            // Otherwise the player is not on the ground and should have gravity and the vertical velocity applied
+            else
+            {
+                verticalVelocity += gravity * Time.deltaTime;
+                velocity.y += verticalVelocity;
+                //Debug.Log("Not Grounded");
+            }
+        }
+
         // Moves the player
-        playerController.Move(velocity * Time.deltaTime * speed);
+        playerController.Move(velocity * Time.deltaTime);
     }
 
     /// <summary>
@@ -160,7 +205,7 @@ public class PlayerController : MonoBehaviour
     private void OnShove(InputValue value)
     {
         RaycastHit hit;
-        Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - 0.49f, transform.position.z);
+        Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
         if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 0.99f))
         {
             // Draws a ray for debugging
@@ -235,6 +280,66 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("No interactable object in range");
         }
+    }
+
+    /// <summary>
+    /// Executes the player's active special ability if possible
+    /// </summary>
+    /// <param name="value"></param>
+    private void OnSpecialAbility(InputValue value)
+    {
+        // TODO: Add some way to check what the current active special ability is then execute that specific special ability logic
+
+        // Jump special ability logic
+        // Will only run if the player is grounded
+        if (playerController.isGrounded)
+        {
+            // Reset successful jump to false
+            successfulJump = false;
+
+            // Shoot a raycast one unit in front of the player
+            RaycastHit hit;
+            Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
+            if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 1f))
+            {
+                // If the hit object is a valid block to jump on, set successful jump to true
+                if (hit.collider.gameObject.tag == "Ground" || hit.collider.gameObject.tag == "Shovable")
+                {
+                    successfulJump = true;
+                }
+            }
+            // Start jump action
+            Debug.Log("Starting Jump");
+            StartCoroutine("JumpAction");
+        }
+    }
+
+    /// <summary>
+    /// Simulates a jump
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator JumpAction()
+    {
+        // Disable player input
+        playerInput.actions.Disable();
+
+        // Calculate the vertical velocity needed to reach target jump height
+        float jumpHeight = 1.5f;
+        verticalVelocity = Mathf.Sqrt(jumpHeight * -3.0f * gravity);
+        
+        // Set jump booleans
+        startJump = true;
+        isJumping = true;
+
+        // Loop until the player is done jumping
+        while (isJumping)
+        {
+            yield return null;
+        }
+        Debug.Log("Done Jump");
+
+        // Enable player input
+        playerInput.actions.Enable();
     }
 
     private void OnTriggerEnter(Collider other)
