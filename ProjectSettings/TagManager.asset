@@ -11,6 +11,8 @@ TagManager:
   - GroundTreasure
   - Enemy
   - Projectile
+  - Shovel
+  - PogoStick
   layers:
   - Default
   - TransparentFX

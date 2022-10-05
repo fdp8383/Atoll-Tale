@@ -18,6 +18,16 @@ public class PlayerController : MonoBehaviour
     private PlayerInput playerInput;
 
     [SerializeField]
+    private GameObject shovel;
+
+    [SerializeField]
+    private GameObject pogoStick;
+
+    private bool hasShovel = false;
+
+    private bool hasPogoStick = false;
+
+    [SerializeField]
     private Material dugMaterial;
 
     [SerializeField]
@@ -134,6 +144,11 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnDig(InputValue value)
     {
+        if (!hasShovel)
+        {
+            return;
+        }
+
         // Shoots a raycast out directly under the player to check for ground to dig
         RaycastHit hit;
         if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
@@ -204,6 +219,11 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnShove(InputValue value)
     {
+        if (!hasShovel)
+        {
+            return;
+        }
+
         RaycastHit hit;
         Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
         if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 0.99f))
@@ -319,6 +339,11 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnSpecialAbility(InputValue value)
     {
+        if (!hasPogoStick)
+        {
+            return;
+        }
+
         // TODO: Add some way to check what the current active special ability is then execute that specific special ability logic
 
         // Jump special ability logic
@@ -354,6 +379,9 @@ public class PlayerController : MonoBehaviour
         // Disable player input
         playerInput.actions.Disable();
 
+        shovel.SetActive(false);
+        pogoStick.SetActive(true);
+
         // Calculate the vertical velocity needed to reach target jump height
         float jumpHeight = 1.5f;
         verticalVelocity = Mathf.Sqrt(jumpHeight * -3.0f * gravity);
@@ -368,6 +396,9 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
         Debug.Log("Done Jump");
+
+        shovel.SetActive(true);
+        pogoStick.SetActive(false);
 
         // Enable player input
         playerInput.actions.Enable();
@@ -389,6 +420,17 @@ public class PlayerController : MonoBehaviour
             {
                 Debug.LogError("Interactable object is missing an InteractableObject script");
             }
+        }
+        else if (other.gameObject.tag == "Shovel")
+        {
+            other.gameObject.SetActive(false);
+            shovel.SetActive(true);
+            hasShovel = true;
+        }
+        else if (other.gameObject.tag == "PogoStick")
+        {
+            other.gameObject.SetActive(false);
+            hasPogoStick = true;
         }
     }
 
