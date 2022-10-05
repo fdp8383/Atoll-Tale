@@ -57,8 +57,8 @@ public class EnemyCannonball : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         // If the collision object is an enemy, stun the enemy
-        GameObject hitObject = other.gameObject;
-        if (hitObject.tag == "Enemy")
+        string objectTag = other.gameObject.tag;
+        if (objectTag == "Enemy")
         {
             EnemyBehavior enemyBehavior = other.GetComponent<EnemyBehavior>();
             if (!enemyBehavior.isStunned)
@@ -67,9 +67,14 @@ public class EnemyCannonball : MonoBehaviour
             }
         }
         // If the collision object is a shovable object, break the shovable object
-        else if (hitObject.tag == "Shovable")
+        else if (objectTag == "Shovable")
         {
-            hitObject.GetComponent<ShovableObject>().StartCoroutine("BreakObject");
+            other.GetComponent<ShovableObject>().StartCoroutine("BreakObject");
+        }
+        // If the collision object is a breakable object, deactivate the breakable object
+        else if (objectTag == "Breakable")
+        {
+            other.gameObject.SetActive(false);
         }
 
         // Deactivate the projectile
