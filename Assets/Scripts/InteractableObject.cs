@@ -51,17 +51,20 @@ public class InteractableObject : MonoBehaviour
     /// </summary>
     public void DoInteraction()
     {
+        // If this interactable object is a treasure chest, add to the player's gold and hide the object
         if (gameObject.name == "InteractableTreasureChest")
         {
             gameManager.AddToPlayerGold(1);
-            hasBeenInteracted = true;
             gameObject.SetActive(false);
         }
+        // Otherwise change the material to the interacted material placeholder
         else
         {
             // Placeholder, sets material to interacted material placeholder
             rend.sharedMaterial = interactedMaterial;
-            hasBeenInteracted = true;
         }
+
+        // Set hasBeenInteracted to true
+        hasBeenInteracted = true;
     }
 }

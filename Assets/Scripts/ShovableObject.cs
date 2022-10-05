@@ -35,17 +35,19 @@ public class ShovableObject : MonoBehaviour
         // Set spawn location
         spawnLocation = transform.position;
 
-        // Get reference to player transform
+        // Get reference to player transform component
         if (!playerTransform)
         {
             playerTransform = GameObject.Find("Player").transform;
         }
 
+        // Get reference to mesh renderer component
         if (!objectMeshRenderer)
         {
             objectMeshRenderer = GetComponent<MeshRenderer>();
         }
 
+        // Get reference to object collider component
         if (!objectCollider)
         {
             objectCollider = GetComponent<BoxCollider>();
@@ -55,6 +57,7 @@ public class ShovableObject : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        // If this object is in a broken state, skip the update logic
         if (isBroken)
         {
             return;
@@ -94,8 +97,8 @@ public class ShovableObject : MonoBehaviour
             // Start applying gravity
             transform.position += Vector3.down * gravitySpeed * Time.deltaTime;
 
-            RaycastHit hit;
-            if(Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), Vector3.down, out hit, 0.5f))
+            // Check if there is ground under the object
+            if(CheckGround())
             {
                 isFalling = false;
             }
@@ -141,7 +144,7 @@ public class ShovableObject : MonoBehaviour
     private bool CheckGround()
     {
         RaycastHit hit;
-        if (Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), Vector3.down, out hit, 1.0f))
+        if (Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), Vector3.down, out hit, 0.5f))
         {
             return true;
         }
@@ -150,6 +153,9 @@ public class ShovableObject : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Moves this object back to it's spawn location
+    /// </summary>
     private void ResetObject()
     {
         // Check if player is at this object's spawn point location
@@ -185,19 +191,22 @@ public class ShovableObject : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Puts this object in a broken state for x amount of seconds then resets the object
     /// </summary>
     /// <returns></returns>
     public IEnumerator BreakObject()
     {
+        // Disables this object
         isBroken = true;
         objectMeshRenderer.enabled = false;
         objectCollider.enabled = false;
         beingShoved = false;
         isFalling = false;
 
+        // Wait for 4 seconds
         yield return new WaitForSeconds(4f);
 
+        // Reset this object
         ResetObject();
         objectMeshRenderer.enabled = true;
         objectCollider.enabled = true;

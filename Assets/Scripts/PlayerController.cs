@@ -144,6 +144,7 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnDig(InputValue value)
     {
+        // If the player does not have the shovel, do not dig
         if (!hasShovel)
         {
             return;
@@ -215,11 +216,13 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnShove(InputValue value)
     {
+        // If the player does not have the shovel, do not shove
         if (!hasShovel)
         {
             return;
         }
 
+        // Perform a small/short raycast in front of the player first
         RaycastHit hit;
         Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
         if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 0.99f))
@@ -246,10 +249,12 @@ public class PlayerController : MonoBehaviour
                     StartCoroutine("ShoveAction");
                 }
             }
+            // If the collider is a projectile, reflect the projectile
             else if (hit.collider.gameObject.tag == "Projectile")
             {
                 ReflectProjectile(hit.collider.gameObject);
             }
+            // If the collider is an enemy, stun the enemy
             else if (hit.collider.gameObject.tag == "Enemy")
             {
                 EnemyBehavior enemyBehavior = hit.collider.GetComponent<EnemyBehavior>();
@@ -259,8 +264,10 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+        // Perform a second larger raycast if the first one did not hit anything, this is mainly meant to detect projectiles
         else if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
         {
+            // If the collider hit was a projectile, reflect the projectile
             if (hit.collider.gameObject.tag == "Projectile")
             {
                 ReflectProjectile(hit.collider.gameObject);
@@ -269,7 +276,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Reflects the projectile in the direction the player is facing
     /// </summary>
     /// <param name="projectile"></param>
     private void ReflectProjectile(GameObject projectile)
@@ -277,6 +284,7 @@ public class PlayerController : MonoBehaviour
         EnemyCannonball enemyCannonball;
         if (enemyCannonball = projectile.GetComponent<EnemyCannonball>())
         {
+            // Calculate the direction/velocity on the grid to reflect the projectile
             Vector3 targetVelocity = CalculateGridPositionInFrontOfPlayer(Vector3.zero, 1);
             enemyCannonball.SetVelocity(targetVelocity);
             StartCoroutine("ShoveAction");
@@ -335,12 +343,13 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnSpecialAbility(InputValue value)
     {
+        // TODO: Add some way to check what the current active special ability is then execute that specific special ability logic
+
+        // If the player does not have the pogo stick, do not execute the special ability logic
         if (!hasPogoStick)
         {
             return;
         }
-
-        // TODO: Add some way to check what the current active special ability is then execute that specific special ability logic
 
         // Jump special ability logic
         // Will only run if the player is grounded
@@ -417,12 +426,14 @@ public class PlayerController : MonoBehaviour
                 Debug.LogError("Interactable object is missing an InteractableObject script");
             }
         }
+        // If the player collides with a shovel, pick up the shovel
         else if (other.gameObject.tag == "Shovel")
         {
             other.gameObject.SetActive(false);
             shovel.SetActive(true);
             hasShovel = true;
         }
+        // If the player collides with a pogo stick, pick up the pogo stick
         else if (other.gameObject.tag == "PogoStick")
         {
             other.gameObject.SetActive(false);
@@ -490,7 +501,6 @@ public class PlayerController : MonoBehaviour
                 objectPosition.z -= unitsToMove;
             }
         }
-
         return objectPosition;
     }
 }

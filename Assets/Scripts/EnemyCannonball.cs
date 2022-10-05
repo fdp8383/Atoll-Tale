@@ -24,21 +24,30 @@ public class EnemyCannonball : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // If this projectile has reached it's max life span, deactivate it
         lifespanTimer -= Time.deltaTime;
         if (lifespanTimer <= 0)
         {
             DeactivateProjectile();
         }
 
+        // Otherwise move the projectile
         transform.position += velocity * speed * Time.deltaTime;
     }
 
+    /// <summary>
+    /// Sets the projectiles velocity and resets it's lifespan timer
+    /// </summary>
+    /// <param name="velocity"></param>
     public void SetVelocity(Vector3 velocity)
     {
         this.velocity = velocity;
         lifespanTimer = maxLifespan;
     }
 
+    /// <summary>
+    /// Deactivates the projectile
+    /// </summary>
     private void DeactivateProjectile()
     {
         velocity = Vector3.zero;
@@ -47,8 +56,8 @@ public class EnemyCannonball : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        // If the collision object is an enemy, stun the enemy
         GameObject hitObject = other.gameObject;
-
         if (hitObject.tag == "Enemy")
         {
             EnemyBehavior enemyBehavior = other.GetComponent<EnemyBehavior>();
@@ -57,11 +66,13 @@ public class EnemyCannonball : MonoBehaviour
                 enemyBehavior.StartCoroutine("StunEnemy");
             }
         }
+        // If the collision object is a shovable object, break the shovable object
         else if (hitObject.tag == "Shovable")
         {
             hitObject.GetComponent<ShovableObject>().StartCoroutine("BreakObject");
         }
 
+        // Deactivate the projectile
         DeactivateProjectile();
     }
 }
