@@ -131,6 +131,15 @@ public class ShovableObject : MonoBehaviour
                 return;
             }
         }
+        // Do a longer second raycast that checks for ramps
+        else if (Physics.Raycast(new Vector3(transform.position.x, transform.position.y - 0.49f, transform.position.z), shoveDirection, out hit, 1.0f))
+        {
+            if (hit.collider.gameObject.name == "GroundRampPlaceholder")
+            {
+                Debug.Log("Cannot be shoved, there is an object in the way");
+                return;
+            }
+        }
 
         beingShoved = true;
         this.shoveDirection = shoveDirection;
@@ -146,6 +155,8 @@ public class ShovableObject : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), Vector3.down, out hit, 0.5f))
         {
+            // Make sure cube lands on grid one level above the ground hit
+            transform.position = new Vector3(hit.transform.position.x, hit.transform.position.y + 1, hit.transform.position.z);
             return true;
         }
 
