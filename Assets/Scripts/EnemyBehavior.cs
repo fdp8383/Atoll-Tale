@@ -96,10 +96,13 @@ public class EnemyBehavior : MonoBehaviour
         cannonBall.GetComponent<EnemyCannonball>().SetVelocity(transform.forward);
 
         // Increment cannonball index, if it reaches the end of the cannonball list, reset it to 0
-        enemyCannonballManager.cannonballIndex++;
-        if (cannonballIndex == enemyCannonballManager.cannonballs.Count)
+        if (cannonballIndex == enemyCannonballManager.cannonballs.Count - 1)
         {
             enemyCannonballManager.cannonballIndex = 0;
+        }
+        else 
+        {
+            enemyCannonballManager.cannonballIndex++;
         }
     }
 
