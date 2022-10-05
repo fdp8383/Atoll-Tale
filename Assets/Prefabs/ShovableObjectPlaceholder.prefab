@@ -111,6 +111,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beingShoved: 0
+  objectMeshRenderer: {fileID: 4903481015662170857}
+  objectCollider: {fileID: 4903481015662170856}
   spawnLocation: {x: 0, y: 0, z: 0}
   gravitySpeed: 5
   playerTransform: {fileID: 0}
+  isBroken: 0

@@ -13,6 +13,12 @@ public class ShovableObject : MonoBehaviour
     private Vector3 shoveTargetLocation;
 
     [SerializeField]
+    private MeshRenderer objectMeshRenderer;
+
+    [SerializeField]
+    private BoxCollider objectCollider;
+
+    [SerializeField]
     private Vector3 spawnLocation;
 
     [SerializeField]
@@ -20,6 +26,8 @@ public class ShovableObject : MonoBehaviour
 
     [SerializeField]
     private Transform playerTransform;
+
+    public bool isBroken = false;
 
     // Start is called before the first frame update
     private void Start()
@@ -32,11 +40,26 @@ public class ShovableObject : MonoBehaviour
         {
             playerTransform = GameObject.Find("Player").transform;
         }
+
+        if (!objectMeshRenderer)
+        {
+            objectMeshRenderer = GetComponent<MeshRenderer>();
+        }
+
+        if (!objectCollider)
+        {
+            objectCollider = GetComponent<BoxCollider>();
+        }
     }
 
     // Update is called once per frame
     private void Update()
     {
+        if (isBroken)
+        {
+            return;
+        }
+
         // If this object is being shoved, move the object towards the target shove location
         if (beingShoved)
         {
@@ -68,8 +91,8 @@ public class ShovableObject : MonoBehaviour
 
             Debug.Log("Falling");
 
-             // Start applying gravity
-             transform.position += Vector3.down * gravitySpeed * Time.deltaTime;
+            // Start applying gravity
+            transform.position += Vector3.down * gravitySpeed * Time.deltaTime;
 
             RaycastHit hit;
             if(Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), Vector3.down, out hit, 0.5f))
@@ -77,24 +100,14 @@ public class ShovableObject : MonoBehaviour
                 isFalling = false;
             }
 
-             // Reset this object to its spawn location if it fell off the level
-             if (transform.position.y < -20.0f)
-             {
-                 // Check if player is at this object's spawn point location
-                 // If it is, move it to a new location 2 units to the right
-                 // Otherwise move the object back to the original spawn location
-                 if (IsPlayerAtSpawnPoint())
-                 {
-                     transform.position = new Vector3(spawnLocation.x + 2, spawnLocation.y, spawnLocation.z);
-                 }
-                 else
-                 {
-                     transform.position = spawnLocation;
-                 }
+            // Reset this object to its spawn location if it fell off the level
+            if (transform.position.y < -20.0f)
+            {
+                ResetObject();
 
-                 // The object is no longer in a falling state
-                 isFalling = false;
-             }
+                // The object is no longer in a falling state
+                isFalling = false;
+            }
         }
     }
 
@@ -137,6 +150,21 @@ public class ShovableObject : MonoBehaviour
         return false;
     }
 
+    private void ResetObject()
+    {
+        // Check if player is at this object's spawn point location
+        // If it is, move it to a new location 2 units to the right
+        // Otherwise move the object back to the original spawn location
+        if (IsPlayerAtSpawnPoint())
+        {
+            transform.position = new Vector3(spawnLocation.x + 2, spawnLocation.y, spawnLocation.z);
+        }
+        else
+        {
+            transform.position = spawnLocation;
+        }
+    }
+
     /// <summary>
     /// Checks if player is at this object's spawn point location
     /// </summary>
@@ -154,5 +182,25 @@ public class ShovableObject : MonoBehaviour
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator BreakObject()
+    {
+        isBroken = true;
+        objectMeshRenderer.enabled = false;
+        objectCollider.enabled = false;
+        beingShoved = false;
+        isFalling = false;
+
+        yield return new WaitForSeconds(4f);
+
+        ResetObject();
+        objectMeshRenderer.enabled = true;
+        objectCollider.enabled = true;
+        isBroken = false;
     }
 }

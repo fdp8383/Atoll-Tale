@@ -234,6 +234,14 @@ public class PlayerController : MonoBehaviour
             {
                 ReflectProjectile(hit.collider.gameObject);
             }
+            else if (hit.collider.gameObject.tag == "Enemy")
+            {
+                EnemyBehavior enemyBehavior = hit.collider.GetComponent<EnemyBehavior>();
+                if (!enemyBehavior.isStunned)
+                {
+                    enemyBehavior.StartCoroutine("StunEnemy");
+                }
+            }
         }
         else if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
         {

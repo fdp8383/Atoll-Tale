@@ -47,6 +47,21 @@ public class EnemyCannonball : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        GameObject hitObject = other.gameObject;
+
+        if (hitObject.tag == "Enemy")
+        {
+            EnemyBehavior enemyBehavior = other.GetComponent<EnemyBehavior>();
+            if (!enemyBehavior.isStunned)
+            {
+                enemyBehavior.StartCoroutine("StunEnemy");
+            }
+        }
+        else if (hitObject.tag == "Shovable")
+        {
+            hitObject.GetComponent<ShovableObject>().StartCoroutine("BreakObject");
+        }
+
         DeactivateProjectile();
     }
 }
