@@ -175,10 +175,6 @@ public class PlayerController : MonoBehaviour
                             treasurePosition.y += 1;
                             treasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
                             groundTreasure.DigUpTreasure(treasurePosition);
-
-                            // TODO: Add gold when interacting with treasure chest
-                            // Adding gold here for now, make seperate interactable treasure chest object and add gold that way in future
-                            gameManager.AddToPlayerGold(1);
                         }
                         else
                         {

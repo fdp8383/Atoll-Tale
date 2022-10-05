@@ -12,6 +12,9 @@ public class InteractableObject : MonoBehaviour
     [SerializeField]
     private Renderer rend;
 
+    [SerializeField]
+    private GameManager gameManager;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -19,6 +22,12 @@ public class InteractableObject : MonoBehaviour
         if (!rend)
         {
             rend = GetComponent<Renderer>();
+        }
+
+        // Get reference to game manager script
+        if (!gameManager)
+        {
+            gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         }
     }
 
@@ -42,8 +51,17 @@ public class InteractableObject : MonoBehaviour
     /// </summary>
     public void DoInteraction()
     {
-        // Placeholder, sets material to interacted material placeholder
-        rend.sharedMaterial = interactedMaterial;
-        hasBeenInteracted = true;
+        if (gameObject.name == "InteractableTreasureChest")
+        {
+            gameManager.AddToPlayerGold(1);
+            hasBeenInteracted = true;
+            gameObject.SetActive(false);
+        }
+        else
+        {
+            // Placeholder, sets material to interacted material placeholder
+            rend.sharedMaterial = interactedMaterial;
+            hasBeenInteracted = true;
+        }
     }
 }
