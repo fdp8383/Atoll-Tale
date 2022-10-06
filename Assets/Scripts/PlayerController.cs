@@ -51,6 +51,8 @@ public class PlayerController : MonoBehaviour
 
     private InteractableObject currentInteractable;
 
+    private bool reset;
+
     // Start is called before the first frame update
     private void Start()
     {
@@ -70,6 +72,14 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        // Reset the player if the reset input is triggered
+        if (reset)
+        {
+            transform.position = new Vector3(1.25f, 1.47000003f, -51.2200012f);
+            reset = false;
+            return;
+        }
+
         UpdateMovement();
     }
 
@@ -407,6 +417,15 @@ public class PlayerController : MonoBehaviour
 
         // Enable player input
         playerInput.actions.Enable();
+    }
+
+    /// <summary>
+    /// Resets the player back to start
+    /// </summary>
+    /// <param name="value"></param>
+    private void OnReset(InputValue value)
+    {
+        reset = true;
     }
 
     private void OnTriggerEnter(Collider other)
