@@ -170,11 +170,17 @@ public class ShovableObject : MonoBehaviour
     private void ResetObject()
     {
         // Check if player is at this object's spawn point location
-        // If it is, move it to a new location 2 units to the right
+        // If it is, move it to a new location
         // Otherwise move the object back to the original spawn location
         if (IsPlayerAtSpawnPoint())
         {
+            // Move object two units to the right of the spawn point
+            // If the object spawns off of the level, move it two units to the front of the spawn point
             transform.position = new Vector3(spawnLocation.x + 2, spawnLocation.y, spawnLocation.z);
+            if (!CheckGround())
+            {
+                transform.position = new Vector3(spawnLocation.x, spawnLocation.y, spawnLocation.z + 2);
+            }
         }
         else
         {

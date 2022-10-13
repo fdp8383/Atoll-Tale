@@ -180,12 +180,24 @@ public class PlayerController : MonoBehaviour
                         GroundTreasure groundTreasure;
                         if (groundTreasure = hit.collider.GetComponent<GroundTreasure>())
                         {
-                            // Calculates the target position to move the treasure chest to and calls the DigUpTreasure method
-                            // on the ground treasure object
+                            // Calculates the target position to move the treasure chest to
+                            // If there is an object in front of the player, move the treasure chest to the right of the player
+                            // If there is an object to the right of the player, move the treasure chest to behind the player
                             Vector3 treasurePosition = hit.collider.transform.position;
                             treasurePosition.y += 1;
-                            treasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
-                            groundTreasure.DigUpTreasure(treasurePosition);
+                            Vector3 targetTreasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
+                            if (Physics.Raycast(treasurePosition, transform.forward, out hit, 2.0f))
+                            {
+                                Debug.Log("Calculating treasure position to right of player");
+                                targetTreasurePosition = CalculateGridPositionToRightOfPlayer(treasurePosition, 2);
+                                if (Physics.Raycast(treasurePosition, transform.right, out hit, 2.0f))
+                                {
+                                    Debug.Log("Calculating treasure position behind player");
+                                    targetTreasurePosition = CalculateGridPositionBehindPlayer(treasurePosition, 2);
+                                }
+                            }
+                            // Calls the DigUpTreasure method on the ground treasure object
+                            groundTreasure.DigUpTreasure(targetTreasurePosition);
                         }
                         else
                         {
@@ -518,6 +530,88 @@ public class PlayerController : MonoBehaviour
             else
             {
                 objectPosition.z -= unitsToMove;
+            }
+        }
+        return objectPosition;
+    }
+
+    /// <summary>
+    /// Calculates the position on the grid to the right of the player
+    /// This method is used to move objects to the right of the player
+    /// </summary>
+    /// <param name="objectPosition">The current position of the object to move</param>
+    /// <param name="unitsToMove">The number of units to offset the position by</param>
+    /// <returns></returns>
+    private Vector3 CalculateGridPositionToRightOfPlayer(Vector3 objectPosition, int unitsToMove)
+    {
+        Vector3 playerRight = transform.right;
+
+        // Checks if the player is moving more in the x or z direction
+        if (Mathf.Abs(playerRight.x) > Mathf.Abs(playerRight.z))
+        {
+            // If the player is moving more in the x direction, check if positive or negative
+            // and update target position accordingly
+            if (playerRight.x > 0)
+            {
+                objectPosition.x += unitsToMove;
+            }
+            else
+            {
+                objectPosition.x -= unitsToMove;
+            }
+        }
+        // If the player is moving more in the z direction, check if positive or negative
+        // and update target position accordingly
+        else
+        {
+            if (playerRight.z > 0)
+            {
+                objectPosition.z += unitsToMove;
+            }
+            else
+            {
+                objectPosition.z -= unitsToMove;
+            }
+        }
+        return objectPosition;
+    }
+
+    /// <summary>
+    /// Calculates the position on the grid behind the player
+    /// This method is used to move objects behind the player
+    /// </summary>
+    /// <param name="objectPosition">The current position of the object to move</param>
+    /// <param name="unitsToMove">The number of units to offset the position by</param>
+    /// <returns></returns>
+    private Vector3 CalculateGridPositionBehindPlayer(Vector3 objectPosition, int unitsToMove)
+    {
+        Vector3 playerforward = transform.forward;
+
+        // Checks if the player is moving more in the x or z direction
+        if (Mathf.Abs(playerforward.x) > Mathf.Abs(playerforward.z))
+        {
+            // If the player is moving more in the x direction, check if positive or negative
+            // and update target position accordingly
+            if (playerforward.x > 0)
+            {
+                objectPosition.x -= unitsToMove;
+            }
+            else
+            {
+                objectPosition.x += unitsToMove;
+            }
+        }
+        // If the player is moving more in the z direction, check if positive or negative
+        // and update target position accordingly
+        else
+        {
+            if (playerforward.z > 0)
+            {
+                objectPosition.z -= unitsToMove;
+            }
+            else
+            {
+                objectPosition.z += unitsToMove;
             }
         }
         return objectPosition;
