@@ -229,6 +229,7 @@ MonoBehaviour:
   dugMaterial: {fileID: 2100000, guid: 02bdceb142a48c94e9403e017b1292e8, type: 2}
   speed: 5
   gravity: -9.81
+  projectileReflectionSpeed: 8
   heightOffset: 0.49
 --- !u!114 &3469287837201352939
 MonoBehaviour:

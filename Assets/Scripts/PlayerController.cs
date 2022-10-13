@@ -36,6 +36,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float gravity = -9.81f;
 
+    [SerializeField]
+    private float projectileReflectionSpeed = 6.0f;
+
     private Vector3 input;
 
     private Vector3 velocity;
@@ -309,6 +312,7 @@ public class PlayerController : MonoBehaviour
             // Calculate the direction/velocity on the grid to reflect the projectile
             Vector3 targetVelocity = CalculateGridPositionInFrontOfPlayer(Vector3.zero, 1);
             enemyCannonball.SetVelocity(targetVelocity);
+            enemyCannonball.SetProjetileSpeed(projectileReflectionSpeed);
             StartCoroutine("ShoveAction");
         }
     }

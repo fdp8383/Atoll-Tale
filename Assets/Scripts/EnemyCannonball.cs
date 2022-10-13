@@ -9,6 +9,9 @@ public class EnemyCannonball : MonoBehaviour
     [SerializeField]
     private float speed = 3.0f;
 
+    [SerializeField]
+    private float baseSpeed = 3.0f;
+
     // The max amount of time the projectile will stay active for
     [SerializeField]
     private float maxLifespan = 8.0f;
@@ -51,6 +54,7 @@ public class EnemyCannonball : MonoBehaviour
     private void DeactivateProjectile()
     {
         velocity = Vector3.zero;
+        speed = baseSpeed;
         this.gameObject.SetActive(false);
     }
 
@@ -79,5 +83,10 @@ public class EnemyCannonball : MonoBehaviour
 
         // Deactivate the projectile
         DeactivateProjectile();
+    }
+
+    public void SetProjetileSpeed(float speed)
+    {
+        this.speed = speed;
     }
 }
