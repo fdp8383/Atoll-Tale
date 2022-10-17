@@ -157,8 +157,8 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnDig(InputValue value)
     {
-        // If the player does not have the shovel, do not dig
-        if (!hasShovel)
+        // If the player does not have the shovel or is jumping, do not dig
+        if (!hasShovel || isJumping)
         {
             return;
         }
@@ -241,8 +241,8 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnShove(InputValue value)
     {
-        // If the player does not have the shovel, do not shove
-        if (!hasShovel)
+        // If the player does not have the shovel or if the player is jumping, do not shove
+        if (!hasShovel || isJumping)
         {
             return;
         }
@@ -342,7 +342,7 @@ public class PlayerController : MonoBehaviour
     private void OnInteract(InputValue value)
     {
         // If there is a current interactable object stored
-        if (currentInteractable)
+        if (currentInteractable && !isJumping)
         {
             // And the interactable object has not been interacted with already
             if (!currentInteractable.GetHasBeenInteracted())
@@ -378,8 +378,8 @@ public class PlayerController : MonoBehaviour
         }
 
         // Jump special ability logic
-        // Will only run if the player is grounded
-        if (playerController.isGrounded)
+        // Will only run if the player is grounded and not currently jumping
+        if (playerController.isGrounded && !isJumping)
         {
             // Reset successful jump to false
             successfulJump = false;
@@ -407,9 +407,7 @@ public class PlayerController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator JumpAction()
     {
-        // Disable player input
-        playerInput.actions.Disable();
-
+        // Hide shovel, show pogo stick
         shovel.SetActive(false);
         pogoStick.SetActive(true);
 
@@ -428,11 +426,9 @@ public class PlayerController : MonoBehaviour
         }
         Debug.Log("Done Jump");
 
+        // Hide pogo stick, show shovel
         shovel.SetActive(true);
         pogoStick.SetActive(false);
-
-        // Enable player input
-        playerInput.actions.Enable();
     }
 
     /// <summary>
