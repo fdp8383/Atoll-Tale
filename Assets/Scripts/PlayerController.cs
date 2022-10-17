@@ -163,15 +163,20 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // Shoots a raycast out directly under the player to check for ground to dig
+        // Shoots a raycast out one unit in front of the player to check for ground to dig
+        float heightToFloorOffset = 1.06f;
+        Vector3 targetDigPosition = new Vector3 (transform.position.x + transform.forward.x, transform.position.y - heightToFloorOffset, transform.position.z + transform.forward.z);
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
+        if (Physics.Linecast(transform.position, targetDigPosition, out hit))
         {
             // Draws a ray for debugging
-            Debug.DrawRay(transform.position, Vector3.down * hit.distance, Color.red);
+            Debug.DrawLine(transform.position, targetDigPosition, Color.red);
 
             if (hit.collider.tag == "Ground" || hit.collider.tag == "GroundTreasure")
             {
+                // Stores position of groud object to dig
+                Vector3 digPosition = hit.transform.position;
+
                 // Checks if current object has already been dug by checking the current material
                 Renderer rend = hit.collider.GetComponent<Renderer>();
                 if (rend.sharedMaterial.name != dugMaterial.name)
@@ -183,6 +188,7 @@ public class PlayerController : MonoBehaviour
                         GroundTreasure groundTreasure;
                         if (groundTreasure = hit.collider.GetComponent<GroundTreasure>())
                         {
+                            // TODO: Change this to Physics.Linecast to shoot a ray towards a specific positon if the current implementation is not robust enough
                             // Calculates the target position to move the treasure chest to
                             // If there is an object in front of the player, move the treasure chest to the right of the player
                             // If there is an object to the right of the player, move the treasure chest to behind the player
@@ -208,30 +214,72 @@ public class PlayerController : MonoBehaviour
                         }
                     }
 
-                    // Set current material to the dug material and start the dig action coroutine
-                    rend.sharedMaterial = dugMaterial;
-                    StartCoroutine("DigAction");
+                    // Start dig action coroutine, passes in position and renderer component of ground object to dig
+                    StartCoroutine(DigAction(digPosition, rend));
                 }
             }
         }
     }
 
     /// <summary>
-    /// Restricts player input while the player's dig animation is playing
+    /// Restricts player input for the duration, centers player on current ground cell and plays the player's dig animation
     /// </summary>
+    /// <param name="digPosition">Reference to position of ground object player is digging on</param>
+    /// <param name="rend">Reference to Renderer component of ground object player is digging on</param>
     /// <returns></returns>
-    private IEnumerator DigAction()
+    private IEnumerator DigAction(Vector3 digPosition, Renderer rend)
     {
         // Disable player input
         playerInput.actions.Disable();
 
-        // TODO: Start dig animation when animation is imported and implemented
+        // Shoot a raycast under the player to find the ground block they are standing on
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
+        {
+            if (hit.collider.gameObject.tag == "Ground")
+            {
+                // Move the player towards the target ground location (center of the current block they are standing on)
+                Vector3 targetGroundLocation = hit.transform.position;
+                targetGroundLocation.y = transform.position.y;
+                Vector3 lookVector;
+                while (Vector3.Distance(transform.position, targetGroundLocation) > 0.05f)
+                {
+                    // Move player towards center of ground block they are standing on
+                    Vector3 tempVelocity = Vector3.MoveTowards(transform.position, targetGroundLocation, 2f * Time.deltaTime);
 
-        // Wait for dig animation to finish, currently has a placeholder for time
-        yield return new WaitForSeconds(2f);
+                    // Set rotation
+                    lookVector = tempVelocity - transform.position;
+                    transform.rotation = Quaternion.LookRotation(lookVector);
+                    transform.position = tempVelocity;
+                    yield return null;
+                }
 
-        // Enable player input
-        playerInput.actions.Enable();
+                // Once the player is close enough to the position, snap it to the position and set rotation
+                transform.position = targetGroundLocation;
+                lookVector = digPosition - transform.position;
+                lookVector.y = 0;
+                transform.rotation = Quaternion.LookRotation(lookVector);
+
+                // Set current material to the dug material;
+                rend.sharedMaterial = dugMaterial;
+
+                // TODO: Start dig animation when animation is imported and implemented
+
+                // Wait for dig animation to finish, currently has a placeholder for time
+                yield return new WaitForSeconds(2f);
+
+                // Enable player input
+                playerInput.actions.Enable();
+            }
+            else
+            {
+                Debug.LogWarning("No ground under player");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No ground under player");
+        }
     }
 
     /// <summary>
