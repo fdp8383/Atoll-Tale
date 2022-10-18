@@ -236,7 +236,7 @@ public class PlayerController : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
         {
-            if (hit.collider.gameObject.tag == "Ground")
+            if (hit.collider.gameObject.tag == "Ground" || hit.collider.tag == "GroundTreasure")
             {
                 // Move the player towards the target ground location (center of the current block they are standing on)
                 Vector3 targetGroundLocation = hit.transform.position;
