@@ -42,7 +42,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Shove",
+                    "name": "Swing",
                     "type": "Button",
                     "id": "541c1fff-14d4-433c-a3db-e033ba5e0407",
                     "expectedControlType": "Button",
@@ -66,6 +66,15 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PushPull",
+                    "type": "Button",
+                    "id": "85caa769-b2b6-449d-b7d2-e85e9c7a0aab",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press(behavior=2)",
                     "initialStateCheck": false
                 }
             ],
@@ -183,7 +192,7 @@
                 {
                     "name": "",
                     "id": "c3ce1ae6-bab2-4567-945c-f18eaf9136c9",
-                    "path": "<Mouse>/rightButton",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -205,11 +214,11 @@
                 {
                     "name": "",
                     "id": "b5d9068b-91c0-404b-b8f9-bf16d5111e9b",
-                    "path": "<Mouse>/leftButton",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Shove",
+                    "action": "Swing",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -220,7 +229,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Shove",
+                    "action": "Swing",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -265,6 +274,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Reset",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fcc2507e-f806-43c7-b526-99b75936310d",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "Press(behavior=2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PushPull",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cb485d0c-8025-4622-b250-21b9f9ff775d",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "Press(behavior=2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PushPull",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
