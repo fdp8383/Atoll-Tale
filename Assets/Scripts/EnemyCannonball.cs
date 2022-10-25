@@ -80,6 +80,17 @@ public class EnemyCannonball : MonoBehaviour
         {
             other.gameObject.SetActive(false);
         }
+        else if (objectTag == "Player")
+        {
+            PlayerController playerController = other.gameObject.GetComponent<PlayerController>();
+            if (!playerController.isInvulnerable)
+            {
+                Debug.Log("Stunned Player");
+                GameObject.Find("GameManager").GetComponent<GameManager>().UpdatePlayerHealth(-1);
+                playerController.StartCoroutine(playerController.StunPlayer(0.25f));
+                playerController.ResetInvulnerabilityDuration();
+            }
+        }
 
         // Deactivate the projectile
         DeactivateProjectile();

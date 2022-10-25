@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour
 {
     public int playerGold;
 
+    public int playerHealth;
+
     // Start is called before the first frame update
     private void Start()
     {
@@ -25,5 +27,24 @@ public class GameManager : MonoBehaviour
     public void AddToPlayerGold(int goldToAdd)
     {
         playerGold += goldToAdd;
+    }
+
+    /// <summary>
+    /// Updates player health
+    /// </summary>
+    /// <param name="healthToAdd"></param>
+    public void UpdatePlayerHealth(int healthToAdd)
+    {
+        playerHealth += healthToAdd;
+
+        if (playerHealth <= 0)
+        {
+            RestartLevelAtCheckpoint();
+        }
+    }
+
+    private void RestartLevelAtCheckpoint()
+    {
+
     }
 }
