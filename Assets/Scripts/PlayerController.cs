@@ -837,7 +837,6 @@ public class PlayerController : MonoBehaviour
     public void ResetPlayer()
     {
         Debug.Log("Resetting player");
-        reset = true;
         StopAllCoroutines();
         startJump = isJumping = successfulJump = isInvulnerable = false;
         velocity = Vector3.zero;
