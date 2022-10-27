@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,13 +16,13 @@ public class PlayerController : MonoBehaviour
     private GameObject dollyCamera;
 
     [SerializeField]
-    private GameObject thirdPersonCamera;
-
-    [SerializeField]
     private CharacterController playerController;
 
     [SerializeField]
     private PlayerInput playerInput;
+
+    [SerializeField]
+    private Vector3 spawnPoint;
 
     [SerializeField]
     private GameObject shovel;
@@ -60,12 +61,6 @@ public class PlayerController : MonoBehaviour
 
     private InteractableObject currentInteractable;
 
-    private bool reset;
-
-    private bool pushpulling = false;
-    private Transform movableObjectTransform;
-    private bool movingForward;
-    private bool centeringOnGround = false;
     //private bool doneCenteringOnGround = false;
 
     [SerializeField]
@@ -87,18 +82,19 @@ public class PlayerController : MonoBehaviour
         {
             playerController = this.gameObject.GetComponent<CharacterController>();
         }
+
+        // Set the player spawn point
+        spawnPoint = transform.position;
     }
 
     // Update is called once per frame
     private void Update()
     {
-        // Reset the player if the reset input is triggered
-        if (reset)
+        /*if (reset)
         {
-            transform.position = new Vector3(1.25f, 1.47000003f, -51.2200012f);
             reset = false;
             return;
-        }
+        }*/
 
         UpdateMovement();
 
@@ -114,24 +110,12 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void UpdateMovement()
     {
-        if (pushpulling)
-        {
-            if (input == transform.forward && !CanMovableBlockMove())
-            {
-                return;
-            }
-            velocity = input * speed;
-            velocity *= 0.5f;
-        }
-        else
-        {
-            // Calculates velocity based on the camera's current rotation and input vector
-            velocity = mainCamera.rotation * input * speed;
-        }
+        // Calculates velocity based on the camera's current rotation and input vector
+        velocity = mainCamera.rotation * input * speed;
         velocity.y = 0.0f;
 
         // Rotates player to face the velocity/move direction
-        if (input.magnitude > 0 && !pushpulling)
+        if (input.magnitude > 0)
         {
             transform.rotation = Quaternion.LookRotation(velocity);
         }
@@ -172,19 +156,8 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (!centeringOnGround)
-        {
-            // Moves the player
-            playerController.Move(velocity * Time.deltaTime);
-        }
-
-        if (pushpulling)
-        {
-            velocity.y = 0;
-            //Vector3 movePosition = CalculateGridPositionInFrontOfPlayer(transform.position, 1.0f);
-            //movableObjectTransform.position = new Vector3 (movePosition.x, movableObjectTransform.position.y, movePosition.z);
-            movableObjectTransform.position += velocity * Time.deltaTime;
-        }
+        // Moves the player
+        playerController.Move(velocity * Time.deltaTime);
     }
 
     /// <summary>
@@ -193,40 +166,8 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnMovement(InputValue value)
     {
-        // TODO: Check with direction on the grid player is facing, then restrict movement to that axis only
-        if (pushpulling)
-        {
-            input = transform.forward * value.Get<Vector2>().y;
-
-            if (input == transform.forward)
-            {
-                movingForward = true;
-
-                Debug.Log("Player moving forward");
-            }
-            else if (input == -transform.forward)
-            {
-                movingForward = false;
-
-                Debug.Log("Player moving backward");
-            }
-        }
-        else
-        {
-            // Set input vector
-            input = new Vector3(value.Get<Vector2>().x, 0f, value.Get<Vector2>().y);
-        }
-    }
-
-    private bool CanMovableBlockMove()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(movableObjectTransform.position, transform.forward, out hit, 0.5f))
-        {
-            Debug.Log("Can't push block, something in the way!");
-            return false;
-        }
-        return true;
+        // Set input vector
+        input = new Vector3(value.Get<Vector2>().x, 0f, value.Get<Vector2>().y);
     }
 
     /// <summary>
@@ -407,7 +348,7 @@ public class PlayerController : MonoBehaviour
         // Perform a small/short raycast in front of the player first
         RaycastHit hit;
         Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
-        /*if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 0.99f))
+        if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 0.99f))
         {
             // Draws a ray for debugging
             Debug.DrawRay(transformPositionHeightOffset, transform.forward * hit.distance, Color.yellow);
@@ -422,6 +363,10 @@ public class PlayerController : MonoBehaviour
                     {
                         return;
                     }
+
+                    Debug.Log("Sending shovable object to add to list: " + shovableObject);
+                    // Update gameManager's list of shovable objects moved since last checkpoint
+                    gameManager.UpdateShovableObjectsMovedList(shovableObject);
 
                     // Calculate target position on grid
                     Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 1);
@@ -445,7 +390,7 @@ public class PlayerController : MonoBehaviour
                     enemyBehavior.StartCoroutine("StunEnemy");
                 }
             }
-        }*/
+        }
         // Perform a second larger raycast if the first one did not hit anything, this is mainly meant to detect projectiles
         if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
         {
@@ -521,326 +466,48 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Player attempts to push or pull a movable block
+    /// 
     /// </summary>
     /// <param name="value"></param>
-    private void OnPushPull(InputValue value)
+    private void OnChargedSwing(InputValue value)
     {
-        // Checks if input is being pressed
-        if (value.isPressed)
+        // If the player does not have the shovel or if the player is jumping, do not shove
+        if (!hasShovel || isJumping)
         {
-            //Debug.Log("Started PushPull");
-
-            // Shoots a raycast in front of the player with a heigh offset
-            RaycastHit hit;
-            Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
-            if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 0.99f))
-            {
-                //Debug.Log("Hit movable object");
-
-                // Draws a ray for debugging
-                Debug.DrawRay(transformPositionHeightOffset, transform.forward * hit.distance, Color.yellow);
-
-                // If the collider is shovable, initialize variables used for shoving
-                if (hit.collider.gameObject.tag == "Shovable")
-                {
-                    movableObjectTransform = hit.transform;
-                    StartCoroutine(PushPullAction());
-
-                    ShovableObject shovableObject;
-                    if (shovableObject = hit.collider.GetComponent<ShovableObject>())
-                    {
-
-
-                        /*if (shovableObject.beingShoved)
-                        {
-                            return;
-                        }
-
-                        // Calculate target position on grid
-                        Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 1);
-
-                        // Call the shove method on the shovable object and start the ShoveAction coroutine
-                        shovableObject.Shove(transform.forward, targetPosition);
-                        StartCoroutine("ShoveAction");
-                        */
-                    }
-                    else
-                    {
-                        Debug.Log("Movable object missing script");
-                    }
-                }
-                else
-                {
-                    Debug.Log("No movable object in range");
-                }
-            }
-            else
-            {
-                Debug.Log("No movable object in range");
-            }
-        }
-        else
-        {
-            Debug.Log("Starting to end PushPull");
-
-            StartCoroutine(EndPushPullAction());
-
-            //dollyCamera.SetActive(true);
-        }
-    }
-
-    private IEnumerator PushPullAction()
-    {
-        // TODO: Setup animations when player is moving towards center of current ground block
-
-        //Debug.Log("Started PushPullAction");
-
-        // Disable player input
-        playerInput.actions.Disable();
-
-        centeringOnGround = true;
-
-        // Shoot a raycast under the player to find the ground block they are standing on
-        /*RaycastHit hit;
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
-        {
-            if (hit.collider.gameObject.tag == "Ground" || hit.collider.tag == "GroundTreasure")
-            {
-                // Move the player towards the target ground location (center of the current block they are standing on)
-                Vector3 targetGroundLocation = hit.transform.position;
-                targetGroundLocation.y = transform.position.y;
-                Vector3 lookVector;
-                while (Vector3.Distance(transform.position, targetGroundLocation) > 0.05f)
-                {
-                    // Move player towards center of ground block they are standing on
-                    Vector3 tempVelocity = Vector3.MoveTowards(transform.position, targetGroundLocation, 2f * Time.deltaTime);
-
-                    // Set rotation
-                    lookVector = tempVelocity - transform.position;
-                    transform.rotation = Quaternion.LookRotation(lookVector);
-                    transform.position = tempVelocity;
-                    yield return null;
-                }
-
-                // Once the player is close enough to the position, snap it to the position and set rotation
-                doneCenteringOnGround = true;
-                transform.position = targetGroundLocation;
-                lookVector = movableObjectTransform.position - transform.position;
-                lookVector.y = 0;
-                transform.rotation = Quaternion.LookRotation(lookVector);
-
-                pushpulling = true;
-
-                Debug.Log("PushPull is true");
-
-                dollyCamera.SetActive(false);
-            }
-            else
-            {
-                Debug.LogWarning("No ground under player");
-            }
-        }
-        else
-        {
-            Debug.LogWarning("No ground under player");
-        }*/
-
-        // Calculate target ground position to center player on
-        Vector3 targetGroundLocation = CalculateGridPositionToCenterPlayer(movableObjectTransform.position, 1);
-        targetGroundLocation.y = transform.position.y;
-        Vector3 lookVector;
-        while (Vector3.Distance(transform.position, targetGroundLocation) > 0.05f)
-        {
-            // Move player towards center of ground block they are standing on
-            Vector3 tempVelocity = Vector3.MoveTowards(transform.position, targetGroundLocation, 2f * Time.deltaTime);
-
-            // Set rotation
-            lookVector = tempVelocity - transform.position;
-            transform.rotation = Quaternion.LookRotation(lookVector);
-            transform.position = tempVelocity;
-            yield return null;
+            return;
         }
 
-        // Once the player is close enough to the position, snap it to the position and set rotation
-        //doneCenteringOnGround = true;
-        transform.position = targetGroundLocation;
-        lookVector = movableObjectTransform.position - transform.position;
-        lookVector.y = 0;
-        transform.rotation = Quaternion.LookRotation(lookVector);
-
-        yield return null;
-
-        centeringOnGround = false;
-
-        pushpulling = true;
-
-        //Debug.Log("PushPull is true");
-
-        //dollyCamera.SetActive(false);
-
-        // Enable player input
-        playerInput.actions.Enable();
-
-        //Debug.Log("PushPullAction setup finished");
-    }
-
-    private IEnumerator EndPushPullAction()
-    {
-        // Disable player input
-        playerInput.actions.Disable();
-
-        //bool movingForward;
-        Vector3 movableObjectTargetGridPosition = Vector3.zero;
-        Vector3 playerTargetGridPosition = Vector3.zero;
-
-        /*if (input == transform.forward)
+        // Perform a small/short raycast in front of the player first
+        RaycastHit hit;
+        Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
+        if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 0.99f))
         {
-            movingForward = true;
+            // Draws a ray for debugging
+            Debug.DrawRay(transformPositionHeightOffset, transform.forward * hit.distance, Color.yellow);
 
-            Debug.Log("Player moving forward");
-        }
-        else
-        {
-            if (input.magnitude > 0)
+            // If the collider is shovable, initialize variables used for shoving
+            if (hit.collider.gameObject.tag == "Shovable")
             {
-                movingForward = false;
-                Debug.Log("Player moving backwards");
-            }
-            else
-            {
-                movingForward = true;
-                Debug.Log("Player has no input so defaulting to forward");
-            }
-        }*/
-
-        if (movableObjectTransform)
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, Vector3.down, out hit, 1.5f))
-            {
-                centeringOnGround = true;
-
-                //movableObjectTargetGridPosition = hit.transform.position;
-                //movableObjectTargetGridPosition.y = movableObjectTransform.position.y;
-                //playerTargetGridPosition = playerHit.transform.position;
-                playerTargetGridPosition = hit.transform.position;
-                playerTargetGridPosition.y = transform.position.y;
-                movableObjectTargetGridPosition = playerTargetGridPosition + transform.forward;
-                movableObjectTargetGridPosition.y = movableObjectTransform.position.y;
-                Vector3 directionToGridPosition = playerTargetGridPosition - transform.position;
-                //Debug.Log("Direction to grid position: " + directionToGridPosition);
-
-                // Checks if the player is moving more in the x or z direction
-                if (Mathf.Abs(directionToGridPosition.x) > Mathf.Abs(directionToGridPosition.z))
+                ShovableObject shovableObject;
+                if (shovableObject = hit.collider.GetComponent<ShovableObject>())
                 {
-                    Debug.Log("Player is moving in X direction");
-
-                    // If the player is moving more in the x direction, check if positive or negative
-                    // and update target position accordingly
-                    if (directionToGridPosition.x > 0)
+                    if (shovableObject.beingShoved)
                     {
-                        if (!movingForward)
-                        {
-                            Debug.Log("Player is moving in X direction and moving backwards");
+                        return;
+                    }
 
-                            movableObjectTargetGridPosition.x -= transform.forward.x;
-                            playerTargetGridPosition.x -= transform.forward.x;
-                        }
-                        else
-                        {
-                            Debug.Log("Player is moving in X direction and moving forwards");
-                        }
-                    }
-                    else
-                    {
-                        if (movingForward)
-                        {
-                            Debug.Log("Player is moving in X direction and moving forwards");
-                            movableObjectTargetGridPosition.x += transform.forward.x;
-                            playerTargetGridPosition.x += transform.forward.x;
-                        }
-                        else
-                        {
-                            Debug.Log("Player is moving in X direction and moving backwards");
-                        }
-                    }
+                    // Update gameManager's list of shovable objects moved since last checkpoint
+                    gameManager.UpdateShovableObjectsMovedList(shovableObject);
+
+                    // Calculate target position on grid
+                    Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 1);
+
+                    // Call the shove method on the shovable object and start the ShoveAction coroutine
+                    shovableObject.Shove(transform.forward, targetPosition);
+                    StartCoroutine("ShoveAction");
                 }
-                // If the player is moving more in the z direction, check if positive or negative
-                // and update target position accordingly
-                else
-                {
-                    Debug.Log("Player is moving in Z direction");
-                    if (directionToGridPosition.z > 0)
-                    {
-                        if (!movingForward)
-                        {
-                            Debug.Log("Player is moving in Z direction and moving backwards");
-                            movableObjectTargetGridPosition.z -= transform.forward.z;
-                            playerTargetGridPosition.z -= transform.forward.z;
-                        }
-                        else
-                        {
-                            Debug.Log("Player is moving in Z direction and moving forwards");
-                        }
-                    }
-                    else
-                    {
-                        if (movingForward)
-                        {
-                            Debug.Log("Player is moving in Z direction and moving forwards");
-                            movableObjectTargetGridPosition.z += transform.forward.z;
-                            playerTargetGridPosition.z += transform.forward.z;
-                        }
-                        else
-                        {
-                            Debug.Log("Player is moving in Z direction and moving backwards");
-                        }
-                    }
-                }
-
-                Debug.Log("Movable object target grid position: " + movableObjectTargetGridPosition);
-                Debug.Log("Player target grid position: " + playerTargetGridPosition);
-
-                //Vector3 lookVector;
-                while (Vector3.Distance(transform.position, playerTargetGridPosition) > 0.05f)
-                {
-                    // Move player towards center of ground block they are standing on
-                    Vector3 tempMovableObjectVelocity = Vector3.MoveTowards(movableObjectTransform.position, movableObjectTargetGridPosition, 2f * Time.deltaTime);
-                    Vector3 tempPlayerVelocity = Vector3.MoveTowards(transform.position, playerTargetGridPosition, 2f * Time.deltaTime);
-
-                    // Set rotation
-                    //lookVector = tempPlayerVelocity - transform.position;
-                    //transform.rotation = Quaternion.LookRotation(lookVector);
-                    movableObjectTransform.position = tempMovableObjectVelocity;
-                    transform.position = tempPlayerVelocity;
-                    //Debug.Log("Player velocity temp: " + tempPlayerVelocity);
-                    //Debug.Log("Movable velocity temp: " + tempMovableObjectVelocity);
-                    yield return null;
-                }
-
-                // Once the player is close enough to the position, snap it to the position and set rotation
-                //doneCenteringOnGround = true;
-                Debug.Log("Moving player to target position: " + playerTargetGridPosition);
-                movableObjectTransform.position = movableObjectTargetGridPosition;
-                transform.position = playerTargetGridPosition;
-                Debug.Log("Player position: " + transform.position);
-                //lookVector = movableObjectTransform.position - transform.position;
-                //lookVector.y = 0;
-                //transform.rotation = Quaternion.LookRotation(lookVector);
             }
         }
-
-        yield return null;
-
-        Debug.Log("Ended PushPull");
-
-        pushpulling = false;
-        centeringOnGround = false;
-        movableObjectTransform = null;
-
-        // Enable player input
-        playerInput.actions.Enable();
     }
 
     /// <summary>
@@ -912,12 +579,12 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Resets the player back to start
+    /// Restarts the scene
     /// </summary>
     /// <param name="value"></param>
     private void OnReset(InputValue value)
     {
-        reset = true;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     /// <summary>
@@ -975,6 +642,13 @@ public class PlayerController : MonoBehaviour
         {
             other.gameObject.SetActive(false);
             hasPogoStick = true;
+        }
+        // If the player collides with a checkpoint, update the player's current checkpoint
+        else if (other.gameObject.tag == "Checkpoint")
+        {
+            spawnPoint = other.transform.position;
+            spawnPoint.y = transform.position.y;
+            gameManager.UpdatePlayerCheckpoint(other.gameObject);
         }
     }
 
@@ -1155,5 +829,19 @@ public class PlayerController : MonoBehaviour
             }
         }
         return objectPosition;
+    }
+
+    /// <summary>
+    /// Resets player to spawn point (last checkpoint)
+    /// </summary>
+    public void ResetPlayer()
+    {
+        Debug.Log("Resetting player");
+        reset = true;
+        StopAllCoroutines();
+        startJump = isJumping = successfulJump = isInvulnerable = false;
+        velocity = Vector3.zero;
+        verticalVelocity = invulnerabilityDurationTimer = 0.0f;
+        currentInteractable = null;
     }
 }

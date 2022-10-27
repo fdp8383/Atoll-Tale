@@ -79,10 +79,10 @@ public class ShovableObject : MonoBehaviour
 
                 Debug.Log("Got to shove location");
 
+                Debug.Log("Checking for ground");
                 // If there is no ground under the object start falling
                 if (!CheckGround())
                 {
-                    Debug.Log("Checking for ground");
                     isFalling = true;
                 }
             }
@@ -97,8 +97,9 @@ public class ShovableObject : MonoBehaviour
             // Start applying gravity
             transform.position += Vector3.down * gravitySpeed * Time.deltaTime;
 
+            Debug.Log("Checking for ground while falling");
             // Check if there is ground under the object
-            if(CheckGround())
+            if (CheckGround())
             {
                 isFalling = false;
             }
@@ -125,7 +126,7 @@ public class ShovableObject : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(transform.position, shoveDirection, out hit, 1.0f))
         {
-            if (hit.collider.tag != "InvisibleBoundsWall")
+            if (hit.collider.tag != "InvisibleBoundsWall" && hit.collider.tag != "Checkpoint")
             {
                 Debug.Log("Cannot be shoved, there is an object in the way");
                 return;
@@ -228,5 +229,15 @@ public class ShovableObject : MonoBehaviour
         objectMeshRenderer.enabled = true;
         objectCollider.enabled = true;
         isBroken = false;
+    }
+
+    /// <summary>
+    /// Resets this shovable object to spawn point
+    /// </summary>
+    public void ResetShovableObject()
+    {
+        StopAllCoroutines();
+        isBroken = isFalling = beingShoved = false;
+        transform.position = spawnLocation;
     }
 }

@@ -8,10 +8,26 @@ public class GameManager : MonoBehaviour
 
     public int playerHealth;
 
+    [SerializeField]
+    private PlayerController playerController;
+
+    [SerializeField]
+    private List<GameObject> checkpointPositions;
+
+    [SerializeField]
+    private Vector3 currentCheckpointPosition;
+
+    [SerializeField]
+    private List<ShovableObject> shovableObjectsMovedSinceLastCheckpoint;
+
     // Start is called before the first frame update
     private void Start()
     {
-        
+        // Get reference to player controller script if not set in editor
+        if (!playerController)
+        {
+            playerController = GameObject.Find("Player").GetComponent<PlayerController>();
+        }
     }
 
     // Update is called once per frame
@@ -39,12 +55,77 @@ public class GameManager : MonoBehaviour
 
         if (playerHealth <= 0)
         {
-            RestartLevelAtCheckpoint();
+            RestartLevelToLastCheckpoint();
         }
     }
 
-    private void RestartLevelAtCheckpoint()
+    /// <summary>
+    /// Updates the player's checkpoint spawn and clears the list of shovable objects moved since the last checkpoint
+    /// </summary>
+    /// <param name="spawnPoint"></param>
+    public void UpdatePlayerCheckpoint(GameObject checkpoint)
     {
+        if (checkpoint != null)
+        {
+            // Checks to see if spawn point passed in has been reached by the player already
+            if (!checkpointPositions.Contains(checkpoint))
+            {
+                currentCheckpointPosition = checkpoint.transform.position;
+                currentCheckpointPosition.y = playerController.transform.position.y;
+                checkpointPositions.Add(checkpoint);
+                shovableObjectsMovedSinceLastCheckpoint.Clear();
+            }
+        }
+    }
 
+    /// <summary>
+    /// Resets level to last checkpoint. So far this includes resetting the player to the last checkpoint spawn point
+    /// and resetting all shovable blocks moved after the last checkpoint to their spawn points
+    /// </summary>
+    private void RestartLevelToLastCheckpoint()
+    {
+        for (int i = 0; i < shovableObjectsMovedSinceLastCheckpoint.Count; i++)
+        {
+            shovableObjectsMovedSinceLastCheckpoint[i].ResetShovableObject();
+        }
+        StartCoroutine(ResetPlayer());
+        playerHealth = 3;
+        if (playerGold > 0)
+        {
+            playerGold -= 1;
+        }
+    }
+
+    /// <summary>
+    /// Updates the shovable objects moved since last checkpoint list by attempting to add a shovable object script
+    /// Will be called by the player when they shove a block
+    /// </summary>
+    /// <param name="shovableObjectToAdd"></param>
+    public void UpdateShovableObjectsMovedList(ShovableObject shovableObjectToAdd)
+    {
+        Debug.Log("Trying to add shovable object to list: " + shovableObjectToAdd);
+
+        if (shovableObjectToAdd != null)
+        {
+            if (!shovableObjectsMovedSinceLastCheckpoint.Contains(shovableObjectToAdd))
+            {
+                shovableObjectsMovedSinceLastCheckpoint.Add(shovableObjectToAdd);
+            }
+        }
+    }    
+
+    /// <summary>
+    /// Resets player, this is done here in the game manager with a time delay to make sure the character controller 
+    /// does not override player position
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator ResetPlayer()
+    {
+        Debug.Log("Resetting player");
+        playerController.ResetPlayer();
+        playerController.transform.position = currentCheckpointPosition;
+        playerController.enabled = false;
+        yield return new WaitForSeconds(0.25f);
+        playerController.enabled = true;
     }
 }

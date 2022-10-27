@@ -69,12 +69,12 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "PushPull",
+                    "name": "ChargedSwing",
                     "type": "Button",
-                    "id": "85caa769-b2b6-449d-b7d2-e85e9c7a0aab",
+                    "id": "8206a440-3a96-43f4-8326-8c9ad9d12cd3",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "initialStateCheck": false
                 }
             ],
@@ -269,7 +269,7 @@
                 {
                     "name": "",
                     "id": "188c05bb-df4c-46af-acf1-db2bcb6f1118",
-                    "path": "<Gamepad>/rightTrigger",
+                    "path": "<Gamepad>/leftTrigger",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -279,23 +279,23 @@
                 },
                 {
                     "name": "",
-                    "id": "fcc2507e-f806-43c7-b526-99b75936310d",
+                    "id": "79411854-dae8-40d0-9901-816bf2b8337a",
                     "path": "<Keyboard>/leftShift",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "",
-                    "action": "PushPull",
+                    "action": "ChargedSwing",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "cb485d0c-8025-4622-b250-21b9f9ff775d",
-                    "path": "<Gamepad>/buttonSouth",
-                    "interactions": "Press(behavior=2)",
+                    "id": "d6ce520d-a32e-4e54-b36b-5b7b5235884e",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "",
-                    "action": "PushPull",
+                    "action": "ChargedSwing",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

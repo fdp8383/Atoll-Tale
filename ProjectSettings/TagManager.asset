@@ -14,6 +14,7 @@ TagManager:
   - Shovel
   - PogoStick
   - Breakable
+  - Checkpoint
   layers:
   - Default
   - TransparentFX

@@ -80,6 +80,8 @@ public class EnemyCannonball : MonoBehaviour
         {
             other.gameObject.SetActive(false);
         }
+        // If the collision object is the player and they are not invulnerable, deal damage to the player, 
+        // stun the player, and restart the player's invulnerability duration
         else if (objectTag == "Player")
         {
             PlayerController playerController = other.gameObject.GetComponent<PlayerController>();
@@ -96,6 +98,10 @@ public class EnemyCannonball : MonoBehaviour
         DeactivateProjectile();
     }
 
+    /// <summary>
+    /// Sets this projectile's speed
+    /// </summary>
+    /// <param name="speed"></param>
     public void SetProjetileSpeed(float speed)
     {
         this.speed = speed;
