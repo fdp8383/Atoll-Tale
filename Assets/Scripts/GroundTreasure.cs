@@ -8,6 +8,9 @@ public class GroundTreasure : MonoBehaviour
     private GameObject interactableTreasure;
 
     [SerializeField]
+    private GameObject treasureSpot;
+
+    [SerializeField]
     private Transform playerTransform;
 
     // Start is called before the first frame update
@@ -20,6 +23,11 @@ public class GroundTreasure : MonoBehaviour
         else
         {
             Debug.LogError("There is no reference to interactable treasure on" + this.gameObject);
+        }
+
+        if (!treasureSpot)
+        {
+            treasureSpot = transform.GetChild(1).gameObject;
         }
 
         if (!playerTransform)
@@ -40,6 +48,7 @@ public class GroundTreasure : MonoBehaviour
     /// <param name="treasurePosition"></param>
     public void DigUpTreasure(Vector3 treasurePosition)
     {
+        treasureSpot.SetActive(false);
         interactableTreasure.SetActive(true);
         interactableTreasure.transform.position = treasurePosition;
         FacePlayerDirection();

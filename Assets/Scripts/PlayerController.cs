@@ -196,45 +196,12 @@ public class PlayerController : MonoBehaviour
                 // Stores position of groud object to dig
                 Vector3 digPosition = hit.transform.position;
 
-                // Checks if current object has already been dug by checking the current material
-                Renderer rend = hit.collider.GetComponent<Renderer>();
-                if (rend.sharedMaterial.name != dugMaterial.name)
+                // Checks if current object has already been dug by checking if the dug spot of the hit ground tile is active
+                GameObject dugSpot = hit.collider.transform.GetChild(0).gameObject;
+                if (!dugSpot.activeInHierarchy)
                 {
-                    // If the ground block has treasure, dig up the treasure
-                    if (hit.collider.tag == "GroundTreasure")
-                    {
-                        // Checks for GroundTreasure script
-                        GroundTreasure groundTreasure;
-                        if (groundTreasure = hit.collider.GetComponent<GroundTreasure>())
-                        {
-                            // TODO: Change this to Physics.Linecast to shoot a ray towards a specific positon if the current implementation is not robust enough
-                            // Calculates the target position to move the treasure chest to
-                            // If there is an object in front of the player, move the treasure chest to the right of the player
-                            // If there is an object to the right of the player, move the treasure chest to behind the player
-                            Vector3 treasurePosition = hit.collider.transform.position;
-                            treasurePosition.y += 1;
-                            Vector3 targetTreasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
-                            if (Physics.Raycast(treasurePosition, transform.forward, out hit, 2.0f))
-                            {
-                                Debug.Log("Calculating treasure position to right of player");
-                                targetTreasurePosition = CalculateGridPositionToRightOfPlayer(treasurePosition, 2);
-                                if (Physics.Raycast(treasurePosition, transform.right, out hit, 2.0f))
-                                {
-                                    Debug.Log("Calculating treasure position behind player");
-                                    targetTreasurePosition = CalculateGridPositionBehindPlayer(treasurePosition, 2);
-                                }
-                            }
-                            // Calls the DigUpTreasure method on the ground treasure object
-                            groundTreasure.DigUpTreasure(targetTreasurePosition);
-                        }
-                        else
-                        {
-                            Debug.LogError("There is no GroundTreasure script on ground trasure object");
-                        }
-                    }
-
                     // Start dig action coroutine, passes in position and renderer component of ground object to dig
-                    StartCoroutine(DigAction(digPosition, rend));
+                    StartCoroutine(DigAction(digPosition, hit.collider.gameObject, dugSpot));
                 }
             }
         }
@@ -246,7 +213,7 @@ public class PlayerController : MonoBehaviour
     /// <param name="digPosition">Reference to position of ground object player is digging on</param>
     /// <param name="rend">Reference to Renderer component of ground object player is digging on</param>
     /// <returns></returns>
-    private IEnumerator DigAction(Vector3 digPosition, Renderer rend)
+    private IEnumerator DigAction(Vector3 digPosition, GameObject groundTileHit, GameObject dugSpot)
     {
         // Disable player input
         playerInput.actions.Disable();
@@ -320,8 +287,42 @@ public class PlayerController : MonoBehaviour
         lookVector.y = 0;
         transform.rotation = Quaternion.LookRotation(lookVector);
 
-        // Set current material to the dug material;
-        rend.sharedMaterial = dugMaterial;
+        // Set dug spot of hit ground tile to active;
+        dugSpot.SetActive(true);
+
+        // If the ground block has treasure, dig up the treasure
+        if (groundTileHit.tag == "GroundTreasure")
+        {
+            // Checks for GroundTreasure script
+            GroundTreasure groundTreasure;
+            if (groundTreasure = groundTileHit.GetComponent<GroundTreasure>())
+            {
+                // TODO: Change this to Physics.Linecast to shoot a ray towards a specific positon if the current implementation is not robust enough
+                // Calculates the target position to move the treasure chest to
+                // If there is an object in front of the player, move the treasure chest to the right of the player
+                // If there is an object to the right of the player, move the treasure chest to behind the player
+                Vector3 treasurePosition = groundTileHit.transform.position;
+                treasurePosition.y += 1;
+                Vector3 targetTreasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
+                RaycastHit hit;
+                if (Physics.Raycast(treasurePosition, transform.forward, out hit, 2.0f))
+                {
+                    Debug.Log("Calculating treasure position to right of player");
+                    targetTreasurePosition = CalculateGridPositionToRightOfPlayer(treasurePosition, 2);
+                    if (Physics.Raycast(treasurePosition, transform.right, out hit, 2.0f))
+                    {
+                        Debug.Log("Calculating treasure position behind player");
+                        targetTreasurePosition = CalculateGridPositionBehindPlayer(treasurePosition, 2);
+                    }
+                }
+                // Calls the DigUpTreasure method on the ground treasure object
+                groundTreasure.DigUpTreasure(targetTreasurePosition);
+            }
+            else
+            {
+                Debug.LogError("There is no GroundTreasure script on ground trasure object");
+            }
+        }
 
         // TODO: Start dig animation when animation is imported and implemented
 
@@ -392,7 +393,7 @@ public class PlayerController : MonoBehaviour
             }
         }
         // Perform a second larger raycast if the first one did not hit anything, this is mainly meant to detect projectiles
-        if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
+        else if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
         {
             // If the collider hit was a projectile, reflect the projectile
             if (hit.collider.gameObject.tag == "Projectile")
@@ -431,7 +432,7 @@ public class PlayerController : MonoBehaviour
         // TODO: Start shove animation when animation is imported and implemented
 
         // Wait for shove animation to finish, currently has a placeholder for time
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
 
         // Enable player input
         playerInput.actions.Enable();

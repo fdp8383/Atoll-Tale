@@ -6,6 +6,7 @@ public class ShovableObject : MonoBehaviour
 {
     public bool beingShoved = false;
 
+    [SerializeField]
     private bool isFalling = false;
 
     private Vector3 shoveDirection;
@@ -66,7 +67,7 @@ public class ShovableObject : MonoBehaviour
         // If this object is being shoved, move the object towards the target shove location
         if (beingShoved)
         {
-            transform.position = Vector3.SmoothDamp(transform.position, shoveTargetLocation, ref shoveDirection, 0.3f);
+            transform.position = Vector3.SmoothDamp(transform.position, shoveTargetLocation, ref shoveDirection, 0.2f);
 
             // If this object has reached its location (or very close to it), it should no longer be in the shoved state
             if (Vector3.Distance(transform.position, shoveTargetLocation) < 0.05f)
@@ -123,6 +124,7 @@ public class ShovableObject : MonoBehaviour
     /// <param name="shoveTargetLocation"></param>
     public void Shove(Vector3 shoveDirection, Vector3 shoveTargetLocation)
     {
+        Debug.Log("Trying to shove block");
         RaycastHit hit;
         if (Physics.Raycast(transform.position, shoveDirection, out hit, 1.0f))
         {
@@ -154,7 +156,7 @@ public class ShovableObject : MonoBehaviour
     private bool CheckGround()
     {
         RaycastHit hit;
-        if (Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), Vector3.down, out hit, 0.5f))
+        if (Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), Vector3.down, out hit, 0.6f))
         {
             // Make sure cube lands on grid one level above the ground hit
             transform.position = new Vector3(hit.transform.position.x, hit.transform.position.y + 1, hit.transform.position.z);
