@@ -316,7 +316,7 @@ public class PlayerController : MonoBehaviour
                 // If there is an object to the right of the player, move the treasure chest to behind the player
                 Vector3 treasurePosition = groundTileHit.transform.position;
                 treasurePosition.y += 1;
-                Vector3 targetTreasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
+                /*Vector3 targetTreasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
                 RaycastHit hit;
                 if (Physics.Raycast(treasurePosition, transform.forward, out hit, 2.0f))
                 {
@@ -327,9 +327,9 @@ public class PlayerController : MonoBehaviour
                         Debug.Log("Calculating treasure position behind player");
                         targetTreasurePosition = CalculateGridPositionBehindPlayer(treasurePosition, 2);
                     }
-                }
+                }*/
                 // Calls the DigUpTreasure method on the ground treasure object
-                groundTreasure.DigUpTreasure(targetTreasurePosition);
+                groundTreasure.DigUpTreasure(treasurePosition);
             }
             else
             {
