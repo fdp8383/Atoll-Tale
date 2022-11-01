@@ -81460,6 +81460,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DevToolsMenu
       objectReference: {fileID: 0}
+    - target: {fileID: 737215717148239819, guid: af1c0a26c0bf4cf45b4d0af0497e78ae, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 737215717148239863, guid: af1c0a26c0bf4cf45b4d0af0497e78ae, type: 3}
       propertyPath: m_Pivot.x
       value: 0
