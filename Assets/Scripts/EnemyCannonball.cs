@@ -85,7 +85,7 @@ public class EnemyCannonball : MonoBehaviour
         else if (objectTag == "Player")
         {
             PlayerController playerController = other.gameObject.GetComponent<PlayerController>();
-            if (!playerController.isInvulnerable)
+            if (!playerController.isInvulnerable && !playerController.godMode)
             {
                 Debug.Log("Stunned Player");
                 GameObject.Find("GameManager").GetComponent<GameManager>().UpdatePlayerHealth(-1);

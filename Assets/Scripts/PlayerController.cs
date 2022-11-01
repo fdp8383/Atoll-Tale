@@ -22,6 +22,9 @@ public class PlayerController : MonoBehaviour
     private PlayerInput playerInput;
 
     [SerializeField]
+    private GameObject devToolsMenu;
+
+    [SerializeField]
     private Vector3 spawnPoint;
 
     [SerializeField]
@@ -52,6 +55,8 @@ public class PlayerController : MonoBehaviour
 
     private float verticalVelocity;
 
+    private Vector3 digPosition;
+
     private bool startJump = false;
     private bool isJumping = false;
     private bool successfulJump = false;
@@ -68,6 +73,8 @@ public class PlayerController : MonoBehaviour
     private float invulnerabilityDurationTimer;
     public bool isInvulnerable = false;
 
+    public bool godMode = false;
+
     // Start is called before the first frame update
     private void Start()
     {
@@ -81,6 +88,12 @@ public class PlayerController : MonoBehaviour
         if (!playerController)
         {
             playerController = this.gameObject.GetComponent<CharacterController>();
+        }
+
+        // Gets reference to dev tools menu
+        if (!devToolsMenu)
+        {
+            devToolsMenu = GameObject.Find("DevToolsMenu");
         }
 
         // Set the player spawn point
@@ -194,7 +207,7 @@ public class PlayerController : MonoBehaviour
             if (hit.collider.tag == "Ground" || hit.collider.tag == "GroundTreasure")
             {
                 // Stores position of groud object to dig
-                Vector3 digPosition = hit.transform.position;
+                digPosition = hit.transform.position;
 
                 // Checks if current object has already been dug by checking if the dug spot of the hit ground tile is active
                 GameObject dugSpot = hit.collider.transform.GetChild(0).gameObject;
@@ -502,6 +515,11 @@ public class PlayerController : MonoBehaviour
 
                     // Calculate target position on grid
                     Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 1);
+                    if (Physics.Raycast(hit.collider.transform.position, targetPosition, out hit, Mathf.Infinity))
+                    {
+                        targetPosition = hit.transform.position;
+                        Debug.Log("Found charged shove target location: " + targetPosition);
+                    }
 
                     // Call the shove method on the shovable object and start the ShoveAction coroutine
                     shovableObject.Shove(transform.forward, targetPosition);
@@ -580,10 +598,50 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Restarts the scene
+    /// Toggles the dev tools menu display
     /// </summary>
     /// <param name="value"></param>
-    private void OnReset(InputValue value)
+    private void OnDevTool(InputValue value)
+    {
+        devToolsMenu.SetActive(!devToolsMenu.activeInHierarchy);
+    }
+
+    /// <summary>
+    /// Toggles god mode. When in god mode the player will not take damage from enemies
+    /// </summary>
+    public void ToggleGodMode()
+    {
+        godMode = !godMode;
+    }
+
+    /// <summary>
+    /// Gives player pogostick
+    /// </summary>
+    public void GivePogostick()
+    {
+        hasPogoStick = true;
+    }
+
+    /// <summary>
+    /// Updates and teleports player to next checkpoint
+    /// </summary>
+    public void TeleportToNextCheckpoint()
+    {
+        gameManager.TeleportPlayerToNextCheckpoint();
+    }
+
+    /// <summary>
+    /// Resets player to last checkpoint reached
+    /// </summary>
+    public void ResetCheckpoint()
+    {
+        gameManager.StartCoroutine(gameManager.ResetPlayer());
+    }
+
+    /// <summary>
+    /// Reloads current scene
+    /// </summary>
+    public void ResetScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
@@ -837,11 +895,11 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void ResetPlayer()
     {
-        Debug.Log("Resetting player");
         StopAllCoroutines();
         startJump = isJumping = successfulJump = isInvulnerable = false;
-        velocity = Vector3.zero;
+        velocity = digPosition = Vector3.zero;
         verticalVelocity = invulnerabilityDurationTimer = 0.0f;
         currentInteractable = null;
+        playerInput.actions.Enable();
     }
 }

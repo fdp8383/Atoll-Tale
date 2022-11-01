@@ -60,21 +60,21 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Reset",
-                    "type": "Button",
-                    "id": "990e80cf-d95a-45aa-964e-b9a63718ade1",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "ChargedSwing",
                     "type": "Button",
                     "id": "8206a440-3a96-43f4-8326-8c9ad9d12cd3",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "Press",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DevTool",
+                    "type": "Button",
+                    "id": "bc3cd892-0d65-429f-850b-c5b1cd61c250",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
                     "initialStateCheck": false
                 }
             ],
@@ -257,28 +257,6 @@
                 },
                 {
                     "name": "",
-                    "id": "352fc8ae-bfc6-4dec-9e7c-aea028a61e58",
-                    "path": "<Keyboard>/r",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Reset",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "188c05bb-df4c-46af-acf1-db2bcb6f1118",
-                    "path": "<Gamepad>/leftTrigger",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Reset",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "79411854-dae8-40d0-9901-816bf2b8337a",
                     "path": "<Keyboard>/leftShift",
                     "interactions": "Press",
@@ -296,6 +274,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "ChargedSwing",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "228a8099-ecbd-46d5-a150-b9ffdf30d104",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DevTool",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

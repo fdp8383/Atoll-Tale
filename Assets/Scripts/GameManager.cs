@@ -12,7 +12,10 @@ public class GameManager : MonoBehaviour
     private PlayerController playerController;
 
     [SerializeField]
-    private List<GameObject> checkpointPositions;
+    private List<GameObject> foundCheckpointPositions;
+
+    [SerializeField]
+    private List<GameObject> allCheckpointPositions;
 
     [SerializeField]
     private Vector3 currentCheckpointPosition;
@@ -28,6 +31,8 @@ public class GameManager : MonoBehaviour
         {
             playerController = GameObject.Find("Player").GetComponent<PlayerController>();
         }
+
+        currentCheckpointPosition = playerController.transform.position;
     }
 
     // Update is called once per frame
@@ -68,11 +73,12 @@ public class GameManager : MonoBehaviour
         if (checkpoint != null)
         {
             // Checks to see if spawn point passed in has been reached by the player already
-            if (!checkpointPositions.Contains(checkpoint))
+            if (!foundCheckpointPositions.Contains(checkpoint))
             {
+                Debug.Log("Updating checkpoint: " + checkpoint.name);
                 currentCheckpointPosition = checkpoint.transform.position;
                 currentCheckpointPosition.y = playerController.transform.position.y;
-                checkpointPositions.Add(checkpoint);
+                foundCheckpointPositions.Add(checkpoint);
                 shovableObjectsMovedSinceLastCheckpoint.Clear();
             }
         }
@@ -112,7 +118,20 @@ public class GameManager : MonoBehaviour
                 shovableObjectsMovedSinceLastCheckpoint.Add(shovableObjectToAdd);
             }
         }
-    }    
+    }
+    
+    /// <summary>
+    /// Updates and teleports player to next checkpoint
+    /// </summary>
+    public void TeleportPlayerToNextCheckpoint()
+    {
+        if (foundCheckpointPositions.Count < allCheckpointPositions.Count)
+        {
+            Debug.Log("Teleporting player to next checkpoint");
+            UpdatePlayerCheckpoint(allCheckpointPositions[foundCheckpointPositions.Count]);
+            StartCoroutine(ResetPlayer());
+        }
+    }
 
     /// <summary>
     /// Resets player, this is done here in the game manager with a time delay to make sure the character controller 
@@ -121,7 +140,6 @@ public class GameManager : MonoBehaviour
     /// <returns></returns>
     public IEnumerator ResetPlayer()
     {
-        Debug.Log("Resetting player");
         playerController.ResetPlayer();
         playerController.transform.position = currentCheckpointPosition;
         playerController.enabled = false;
