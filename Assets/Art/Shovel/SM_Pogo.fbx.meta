@@ -3,7 +3,12 @@ guid: 3e54bc38fbbda884ea93f98859f88eb4
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Pogo
+    second: {fileID: 2100000, guid: 8fe2d368ec5f13c47a4fd87759d81918, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

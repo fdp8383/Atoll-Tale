@@ -3,7 +3,22 @@ guid: 62d8217220582e24dbf7708b00346e84
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Shovel
+    second: {fileID: 2100000, guid: f35812036d3d1284d97c652fc237fe61, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: T_Shovel_AT
+    second: {fileID: 2800000, guid: e716d20b51fc40341858a9e505bef59f, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: T_Shovel_MS
+    second: {fileID: 2800000, guid: 9baaa5ccaed499044a7317f31da518a1, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

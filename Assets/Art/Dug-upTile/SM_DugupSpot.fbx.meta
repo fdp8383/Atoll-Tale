@@ -3,7 +3,12 @@ guid: 8d4117f342af90448a618683b39e01a1
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_DugTile
+    second: {fileID: 2100000, guid: a773799523c0fe2408003456f61f4ff1, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
