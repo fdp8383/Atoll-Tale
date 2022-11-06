@@ -15,6 +15,7 @@ TagManager:
   - PogoStick
   - Breakable
   - Checkpoint
+  - InvisiblePuzzleWall
   layers:
   - Default
   - TransparentFX
