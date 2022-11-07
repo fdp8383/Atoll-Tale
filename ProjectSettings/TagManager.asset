@@ -16,6 +16,7 @@ TagManager:
   - Breakable
   - Checkpoint
   - InvisiblePuzzleWall
+  - GroundRamp
   layers:
   - Default
   - TransparentFX
@@ -23,7 +24,7 @@ TagManager:
   - Walls
   - Water
   - UI
-  - 
+  - Player
   - 
   - 
   - 
