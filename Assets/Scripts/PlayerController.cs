@@ -386,7 +386,7 @@ public class PlayerController : MonoBehaviour
                     Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 1);
 
                     // Call the shove method on the shovable object and start the ShoveAction coroutine
-                    shovableObject.Shove(transform.forward, targetPosition);
+                    shovableObject.Shove(transform.forward, targetPosition, 1f, 0.2f, 0.05f, false);
                     StartCoroutine("ShoveAction");
                 }
             }
@@ -514,15 +514,18 @@ public class PlayerController : MonoBehaviour
                     gameManager.UpdateShovableObjectsMovedList(shovableObject);
 
                     // Calculate target position on grid
-                    Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 1);
-                    if (Physics.Raycast(hit.collider.transform.position, targetPosition, out hit, Mathf.Infinity))
+                    Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 5);
+                    float distance = 5;
+                    if (Physics.Linecast(new Vector3(hit.transform.position.x, hit.transform.position.y - 0.40f, hit.transform.position.z), targetPosition, out hit, 3))
                     {
-                        targetPosition = hit.transform.position;
+                        distance = Mathf.Floor(Vector3.Distance(shovableObject.transform.position, hit.collider.transform.position));
+                        distance -= 1;
+                        targetPosition = CalculateGridPositionInFrontOfPlayer(shovableObject.transform.position, distance);
                         Debug.Log("Found charged shove target location: " + targetPosition);
                     }
 
                     // Call the shove method on the shovable object and start the ShoveAction coroutine
-                    shovableObject.Shove(transform.forward, targetPosition);
+                    shovableObject.Shove(transform.forward, targetPosition, distance, Mathf.Clamp(distance / 10.0f, 0.2f, 0.5f), 0.05f * distance, true);
                     StartCoroutine("ShoveAction");
                 }
             }

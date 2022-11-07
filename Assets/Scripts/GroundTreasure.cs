@@ -50,7 +50,10 @@ public class GroundTreasure : MonoBehaviour
     {
         treasureSpot.SetActive(false);
         interactableTreasure.SetActive(true);
-        interactableTreasure.transform.position = treasurePosition;
+        if (interactableTreasure.name == "InteractableTreasureChest")
+        {
+            interactableTreasure.transform.position = treasurePosition;
+        }
         FacePlayerDirection();
         Debug.Log("Dug up treasure!");
     }
