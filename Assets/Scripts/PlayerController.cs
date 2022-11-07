@@ -340,7 +340,7 @@ public class PlayerController : MonoBehaviour
         // TODO: Start dig animation when animation is imported and implemented
 
         // Wait for dig animation to finish, currently has a placeholder for time
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.1f);
 
         // Enable player input
         playerInput.actions.Enable();
