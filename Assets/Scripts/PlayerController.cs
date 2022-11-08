@@ -345,6 +345,7 @@ public class PlayerController : MonoBehaviour
             {
                 // Move player towards center of ground block they are standing on
                 Vector3 tempVelocity = Vector3.MoveTowards(transform.position, targetGroundLocation, (speed / 2) * Time.deltaTime);
+                playerAnimator.SetBool("isWalking", true);
 
                 // Set rotation
                 lookVector = tempVelocity - transform.position;
@@ -357,6 +358,7 @@ public class PlayerController : MonoBehaviour
             lookVector = digPosition - transform.position;
             lookVector.y = 0;
             transform.rotation = Quaternion.LookRotation(lookVector);
+            playerAnimator.SetBool("isWalking", false);
 
             // Set dug spot of hit ground tile to active;
             dugSpot.SetActive(true);
