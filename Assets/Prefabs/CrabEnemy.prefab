@@ -151,6 +151,6 @@ MonoBehaviour:
   playerTransform: {fileID: 0}
   isStunned: 0
   stunDuration: 3
-  enemyMaterial: {fileID: 0}
-  enemyStunnedMatertial: {fileID: 0}
-  rend: {fileID: 0}
+  enemyMaterial: {fileID: -9024437546404120987, guid: 1b18ce59f87d1b04893123353bafa214, type: 3}
+  enemyStunnedMatertial: {fileID: 2100000, guid: 55d1873e87dac0646b9ddfebf05ba7d5, type: 2}
+  rend: {fileID: 8202339556718146709}

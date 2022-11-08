@@ -18,10 +18,13 @@ public class EnemyCannonball : MonoBehaviour
 
     private float lifespanTimer;
 
+    [SerializeField]
+    private GameManager gameManager;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
@@ -88,9 +91,9 @@ public class EnemyCannonball : MonoBehaviour
             if (!playerController.isInvulnerable && !playerController.godMode)
             {
                 Debug.Log("Stunned Player");
-                GameObject.Find("GameManager").GetComponent<GameManager>().UpdatePlayerHealth(-1);
                 playerController.StartCoroutine(playerController.StunPlayer(0.25f));
                 playerController.ResetInvulnerabilityDuration();
+                gameManager.UpdatePlayerHealth(-1);
             }
         }
 

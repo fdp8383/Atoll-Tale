@@ -177,7 +177,7 @@ public class EnemyBehavior : MonoBehaviour
     {
         // Sets isStunned to true and changes the material to the stunned material
         isStunned = true;
-        //rend.sharedMaterial = enemyStunnedMatertial;
+        rend.sharedMaterial = enemyStunnedMatertial;
 
         // Waits for the stun duration
         yield return new WaitForSeconds(stunDuration);
@@ -185,7 +185,7 @@ public class EnemyBehavior : MonoBehaviour
         // Sets isStunned to false and changes material back to enemy material
         // Also resets the cooldown timer
         isStunned = false;
-        //rend.sharedMaterial = enemyMaterial;
+        rend.sharedMaterial = enemyMaterial;
         cooldownTimer = fireRate;
     }
 }

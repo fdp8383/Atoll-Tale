@@ -66,6 +66,18 @@ public class PlayerController : MonoBehaviour
 
     private InteractableObject currentInteractable;
 
+    [SerializeField]
+    private Renderer rend;
+
+    [SerializeField]
+    private Material playerMaterial;
+
+    [SerializeField]
+    private Material playerDamagedMaterial;
+
+    [SerializeField]
+    private Material playerInvincibleMaterial;
+
     //private bool doneCenteringOnGround = false;
 
     [SerializeField]
@@ -115,6 +127,7 @@ public class PlayerController : MonoBehaviour
         if (invulnerabilityDurationTimer <= 0)
         {
             isInvulnerable = false;
+            rend.sharedMaterial = playerMaterial;
         }
     }
 
@@ -694,8 +707,12 @@ public class PlayerController : MonoBehaviour
         // Disable player input
         playerInput.actions.Disable();
 
+        rend.sharedMaterial = playerDamagedMaterial;
+
         // Stun player for passed in stun duration
         yield return new WaitForSeconds(stunDuration);
+
+        rend.sharedMaterial = playerInvincibleMaterial;
 
         // Enable player input
         playerInput.actions.Enable();
@@ -934,6 +951,7 @@ public class PlayerController : MonoBehaviour
     public void ResetPlayer()
     {
         StopAllCoroutines();
+        rend.sharedMaterial = playerMaterial;
         startJump = isJumping = successfulJump = isInvulnerable = false;
         velocity = digPosition = Vector3.zero;
         verticalVelocity = invulnerabilityDurationTimer = 0.0f;
