@@ -468,7 +468,7 @@ public class PlayerController : MonoBehaviour
             }
         }
         // Perform a second larger raycast if the first one did not hit anything, this is mainly meant to detect projectiles
-        else if (Physics.SphereCast(transformPositionHeightOffset, 1.5f, transform.forward, out hit, 2.5f))
+        else if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
         {
             // If the collider hit was a projectile, reflect the projectile
             if (hit.collider.gameObject.tag == "Projectile")
