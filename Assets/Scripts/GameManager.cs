@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
         // Get reference to player controller script if not set in editor
         if (!playerController)
         {
-            playerController = GameObject.Find("Player").GetComponent<PlayerController>();
+            playerController = GameObject.Find("Player").GetComponentInChildren<PlayerController>();
         }
 
         currentCheckpointPosition = playerController.transform.position;

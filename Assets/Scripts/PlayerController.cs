@@ -22,6 +22,9 @@ public class PlayerController : MonoBehaviour
     private PlayerInput playerInput;
 
     [SerializeField]
+    private Animator playerAnimator;
+
+    [SerializeField]
     private GameObject devToolsMenu;
 
     [SerializeField]
@@ -145,6 +148,10 @@ public class PlayerController : MonoBehaviour
         {
             transform.rotation = Quaternion.LookRotation(velocity);
         }
+        else
+        {
+            playerAnimator.SetBool("isWalking", false);
+        }
 
         // Set default vertical velocity to -0.5f so playerController.IsGrounded check works properly
         velocity.y = -0.5f;
@@ -194,6 +201,7 @@ public class PlayerController : MonoBehaviour
     {
         // Set input vector
         input = new Vector3(value.Get<Vector2>().x, 0f, value.Get<Vector2>().y);
+        playerAnimator.SetBool("isWalking", true);
     }
 
     /// <summary>
@@ -209,7 +217,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Shoots a raycast out one unit in front of the player to check for ground to dig
-        float heightToFloorOffset = 1.06f;
+        float heightToFloorOffset = 0.32f;
         Vector3 targetDigPosition = new Vector3 (transform.position.x + transform.forward.x, transform.position.y - heightToFloorOffset, transform.position.z + transform.forward.z);
         RaycastHit hit;
         if (Physics.Linecast(transform.position, targetDigPosition, out hit))
@@ -217,19 +225,22 @@ public class PlayerController : MonoBehaviour
             // Draws a ray for debugging
             Debug.DrawLine(transform.position, targetDigPosition, Color.red);
 
-            if (Physics.Raycast(hit.transform.position, Vector3.up, 1.0f))
+            RaycastHit groundCheck;
+            if (Physics.Raycast(hit.transform.position, Vector3.up, out groundCheck, 1.0f))
             {
-                Debug.Log("Cannot dig at tile hit, there is a block on top of it");
-                return;
+                if (groundCheck.collider.tag != "Player")
+                {
+                    Debug.Log("Cannot dig at tile hit, there is a block on top of it", groundCheck.collider.gameObject);
+                    return;
+                }
             }
 
-            if (transform.position.y - hit.transform.position.y < 1.1f)
+            if (transform.position.y - hit.transform.position.y < 0.64f)
             {
                 Debug.Log("Cannot dig at tile hit, it is above the current level the player is on");
                 return;
             }
 
-            RaycastHit groundCheck;
             if (Physics.Raycast(transform.position, Vector3.down, out groundCheck, 1.5f))
             {
                 if (groundCheck.collider.tag == "GroundRamp")
@@ -318,7 +329,7 @@ public class PlayerController : MonoBehaviour
 
         Vector3 targetGroundLocation = CalculateGridPositionToCenterPlayer(digPosition, 1);
         Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
-        if (Physics.Raycast(targetGroundLocation, Vector3.up, 1.0f, 6) || Physics.Raycast(transformPositionHeightOffset, transform.forward, 0.99f))
+        if (Physics.Raycast(targetGroundLocation, Vector3.up, 1.0f, 6) || Physics.Raycast(transformPositionHeightOffset, transform.forward, 0.99f, 6))
         {
             Debug.Log("Cannot center on target ground location, there is a block on top of it or in front of player");
             // Enable player input
@@ -409,9 +420,10 @@ public class PlayerController : MonoBehaviour
 
         // Perform a small/short raycast in front of the player first
         RaycastHit hit;
-        Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
-        if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 0.99f))
+        Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 0.99f))
         {
+            Debug.Log("Hit something on swing", hit.collider.gameObject);
             // Draws a ray for debugging
             Debug.DrawRay(transformPositionHeightOffset, transform.forward * hit.distance, Color.yellow);
 
@@ -541,11 +553,11 @@ public class PlayerController : MonoBehaviour
 
         // Perform a small/short raycast in front of the player first
         RaycastHit hit;
-        Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
-        if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 0.99f))
+        //Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 0.99f))
         {
             // Draws a ray for debugging
-            Debug.DrawRay(transformPositionHeightOffset, transform.forward * hit.distance, Color.yellow);
+            Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.yellow);
 
             // If the collider is shovable, initialize variables used for shoving
             if (hit.collider.gameObject.tag == "Shovable")
@@ -564,7 +576,7 @@ public class PlayerController : MonoBehaviour
                     // Calculate target position on grid
                     Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 5);
                     float distance = 5;
-                    if (Physics.Linecast(new Vector3(hit.transform.position.x, hit.transform.position.y - 0.40f, hit.transform.position.z), targetPosition, out hit, 3))
+                    if (Physics.Linecast(new Vector3(hit.transform.position.x, hit.transform.position.y + 0f, hit.transform.position.z), targetPosition, out hit, 3))
                     {
                         distance = Mathf.Floor(Vector3.Distance(shovableObject.transform.position, hit.collider.transform.position));
                         distance -= 1;
@@ -603,8 +615,8 @@ public class PlayerController : MonoBehaviour
 
             // Shoot a raycast one unit in front of the player
             RaycastHit hit;
-            Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
-            if (Physics.Raycast(transformPositionHeightOffset, transform.forward, out hit, 1f))
+            //Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
+            if (Physics.Raycast(transform.position, transform.forward, out hit, 1f))
             {
                 // If the hit object is a valid block to jump on, set successful jump to true
                 if (hit.collider.gameObject.tag == "Ground" || hit.collider.gameObject.tag == "Shovable")
