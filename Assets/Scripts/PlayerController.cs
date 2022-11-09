@@ -643,7 +643,7 @@ public class PlayerController : MonoBehaviour
         pogoStick.SetActive(true);
 
         // Calculate the vertical velocity needed to reach target jump height
-        float jumpHeight = 1.5f;
+        float jumpHeight = 1.3f;
         verticalVelocity = Mathf.Sqrt(jumpHeight * -3.0f * gravity);
         
         // Set jump booleans

@@ -84851,6 +84851,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1442654176}
     m_Modifications:
+    - target: {fileID: -8618972442930411124, guid: a854be7d2e7fd9147a1d997a1dc660d3, type: 3}
+      propertyPath: fireRate
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8618972442930411124, guid: a854be7d2e7fd9147a1d997a1dc660d3, type: 3}
+      propertyPath: enemyDetectionDistance
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7034548413153546234, guid: a854be7d2e7fd9147a1d997a1dc660d3, type: 3}
       propertyPath: m_RootOrder
       value: 55
