@@ -331,79 +331,102 @@ public class PlayerController : MonoBehaviour
         Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
         if (Physics.Raycast(targetGroundLocation, Vector3.up, 1.0f, 6) || Physics.Raycast(transformPositionHeightOffset, transform.forward, 0.99f, 6))
         {
-            Debug.Log("Cannot center on target ground location, there is a block on top of it or in front of player");
+            Debug.LogWarning("Cannot center on target ground location, there is a block on top of it or in front of player");
             // Enable player input
             playerInput.actions.Enable();
             yield return null;
         }
         else
         {
+            RaycastHit groundCheck;
             targetGroundLocation.y = transform.position.y;
-            Vector3 lookVector;
-            Debug.Log("Trying to move to target location: " + targetGroundLocation);
-            while (Vector3.Distance(transform.position, targetGroundLocation) > 0.05f)
+            Debug.Log("Checking for ground at target location to center at: " + targetGroundLocation);
+            if (Physics.Raycast(targetGroundLocation, Vector3.down, out groundCheck, 0.65f))
             {
-                // Move player towards center of ground block they are standing on
-                Vector3 tempVelocity = Vector3.MoveTowards(transform.position, targetGroundLocation, (speed / 2) * Time.deltaTime);
-                playerAnimator.SetBool("isWalking", true);
-
-                // Set rotation
-                lookVector = tempVelocity - transform.position;
-                transform.rotation = Quaternion.LookRotation(lookVector);
-                transform.position = tempVelocity;
-                yield return null;
-            }
-
-            transform.position = targetGroundLocation;
-            lookVector = digPosition - transform.position;
-            lookVector.y = 0;
-            transform.rotation = Quaternion.LookRotation(lookVector);
-            playerAnimator.SetBool("isWalking", false);
-
-            // Set dug spot of hit ground tile to active;
-            dugSpot.SetActive(true);
-
-            // If the ground block has treasure, dig up the treasure
-            if (groundTileHit.tag == "GroundTreasure")
-            {
-                // Checks for GroundTreasure script
-                GroundTreasure groundTreasure;
-                if (groundTreasure = groundTileHit.GetComponent<GroundTreasure>())
+                Debug.Log("Hit something: ", groundCheck.collider.gameObject);
+                if (groundCheck.collider.tag != "Ground")
                 {
-                    // TODO: Change this to Physics.Linecast to shoot a ray towards a specific positon if the current implementation is not robust enough
-                    // Calculates the target position to move the treasure chest to
-                    // If there is an object in front of the player, move the treasure chest to the right of the player
-                    // If there is an object to the right of the player, move the treasure chest to behind the player
-                    Vector3 treasurePosition = groundTileHit.transform.position;
-                    treasurePosition.y += 1;
-                    /*Vector3 targetTreasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
-                    RaycastHit hit;
-                    if (Physics.Raycast(treasurePosition, transform.forward, out hit, 2.0f))
-                    {
-                        Debug.Log("Calculating treasure position to right of player");
-                        targetTreasurePosition = CalculateGridPositionToRightOfPlayer(treasurePosition, 2);
-                        if (Physics.Raycast(treasurePosition, transform.right, out hit, 2.0f))
-                        {
-                            Debug.Log("Calculating treasure position behind player");
-                            targetTreasurePosition = CalculateGridPositionBehindPlayer(treasurePosition, 2);
-                        }
-                    }*/
-                    // Calls the DigUpTreasure method on the ground treasure object
-                    groundTreasure.DigUpTreasure(treasurePosition);
+                    Debug.LogWarning("Cannot center on target ground location, there is no block underneath to center on");
+                    // Enable player input
+                    playerInput.actions.Enable();
+                    yield return null;
                 }
                 else
                 {
-                    Debug.LogError("There is no GroundTreasure script on ground trasure object");
+                    Vector3 lookVector;
+                    Debug.Log("Trying to move to target location: " + targetGroundLocation);
+                    while (Vector3.Distance(transform.position, targetGroundLocation) > 0.05f)
+                    {
+                        // Move player towards center of ground block they are standing on
+                        Vector3 tempVelocity = Vector3.MoveTowards(transform.position, targetGroundLocation, (speed / 2) * Time.deltaTime);
+                        playerAnimator.SetBool("isWalking", true);
+
+                        // Set rotation
+                        lookVector = tempVelocity - transform.position;
+                        transform.rotation = Quaternion.LookRotation(lookVector);
+                        transform.position = tempVelocity;
+                        yield return null;
+                    }
+
+                    transform.position = targetGroundLocation;
+                    lookVector = digPosition - transform.position;
+                    lookVector.y = 0;
+                    transform.rotation = Quaternion.LookRotation(lookVector);
+                    playerAnimator.SetBool("isWalking", false);
+
+                    // Set dug spot of hit ground tile to active;
+                    dugSpot.SetActive(true);
+
+                    // If the ground block has treasure, dig up the treasure
+                    if (groundTileHit.tag == "GroundTreasure")
+                    {
+                        // Checks for GroundTreasure script
+                        GroundTreasure groundTreasure;
+                        if (groundTreasure = groundTileHit.GetComponent<GroundTreasure>())
+                        {
+                            // TODO: Change this to Physics.Linecast to shoot a ray towards a specific positon if the current implementation is not robust enough
+                            // Calculates the target position to move the treasure chest to
+                            // If there is an object in front of the player, move the treasure chest to the right of the player
+                            // If there is an object to the right of the player, move the treasure chest to behind the player
+                            Vector3 treasurePosition = groundTileHit.transform.position;
+                            treasurePosition.y += 1;
+                            /*Vector3 targetTreasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
+                            RaycastHit hit;
+                            if (Physics.Raycast(treasurePosition, transform.forward, out hit, 2.0f))
+                            {
+                                Debug.Log("Calculating treasure position to right of player");
+                                targetTreasurePosition = CalculateGridPositionToRightOfPlayer(treasurePosition, 2);
+                                if (Physics.Raycast(treasurePosition, transform.right, out hit, 2.0f))
+                                {
+                                    Debug.Log("Calculating treasure position behind player");
+                                    targetTreasurePosition = CalculateGridPositionBehindPlayer(treasurePosition, 2);
+                                }
+                            }*/
+                            // Calls the DigUpTreasure method on the ground treasure object
+                            groundTreasure.DigUpTreasure(treasurePosition);
+                        }
+                        else
+                        {
+                            Debug.LogError("There is no GroundTreasure script on ground trasure object");
+                        }
+                    }
+
+                    // TODO: Start dig animation when animation is imported and implemented
+
+                    // Wait for dig animation to finish, currently has a placeholder for time
+                    yield return new WaitForSeconds(0.1f);
+
+                    // Enable player input
+                    playerInput.actions.Enable();
                 }
             }
-
-            // TODO: Start dig animation when animation is imported and implemented
-
-            // Wait for dig animation to finish, currently has a placeholder for time
-            yield return new WaitForSeconds(0.1f);
-
-            // Enable player input
-            playerInput.actions.Enable();
+            else
+            {
+                Debug.LogWarning("Cannot center on target ground location, there is no block underneath to center on");
+                // Enable player input
+                playerInput.actions.Enable();
+                yield return null;
+            }
         }
     }
 
