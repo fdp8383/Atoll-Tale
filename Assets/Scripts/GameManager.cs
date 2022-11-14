@@ -1,12 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
     public int playerGold;
 
     public int playerHealth;
+
+    [SerializeField]
+    private TextMeshProUGUI cointText;
+
+    [SerializeField]
+    private List<GameObject> fullHearts;
+
+    [SerializeField]
+    private GameObject pogostickIcon;
 
     [SerializeField]
     private PlayerController playerController;
@@ -48,6 +58,7 @@ public class GameManager : MonoBehaviour
     public void AddToPlayerGold(int goldToAdd)
     {
         playerGold += goldToAdd;
+        cointText.text = "x " + playerGold;
     }
 
     /// <summary>
@@ -57,10 +68,15 @@ public class GameManager : MonoBehaviour
     public void UpdatePlayerHealth(int healthToAdd)
     {
         playerHealth += healthToAdd;
-
         if (playerHealth <= 0)
         {
+            playerHealth = 0;
+            fullHearts[0].SetActive(false);
             RestartLevelToLastCheckpoint();
+        }
+        else
+        {
+            fullHearts[playerHealth].SetActive(false);
         }
     }
 
@@ -144,6 +160,20 @@ public class GameManager : MonoBehaviour
         playerController.transform.position = currentCheckpointPosition;
         playerController.enabled = false;
         yield return new WaitForSeconds(0.25f);
+        for (int i = 0; i < fullHearts.Count; i++)
+        {
+            fullHearts[i].SetActive(true);
+        }
+        cointText.text = "x " + playerGold;
         playerController.enabled = true;
+    }
+
+
+    public void SetActiveSepcialAbility(string specialAbility)
+    {
+        if (specialAbility == "Pogostick")
+        {
+            pogostickIcon.SetActive(true);
+        }
     }
 }

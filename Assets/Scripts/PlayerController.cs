@@ -708,6 +708,7 @@ public class PlayerController : MonoBehaviour
     public void GivePogostick()
     {
         hasPogoStick = true;
+        gameManager.SetActiveSepcialAbility("Pogostick");
     }
 
     /// <summary>
@@ -792,7 +793,7 @@ public class PlayerController : MonoBehaviour
         else if (other.gameObject.tag == "PogoStick")
         {
             other.gameObject.SetActive(false);
-            hasPogoStick = true;
+            GivePogostick();
         }
         // If the player collides with a checkpoint, update the player's current checkpoint
         else if (other.gameObject.tag == "Checkpoint")
