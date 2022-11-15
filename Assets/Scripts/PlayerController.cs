@@ -140,7 +140,8 @@ public class PlayerController : MonoBehaviour
     private void UpdateMovement()
     {
         // Calculates velocity based on the camera's current rotation and input vector
-        velocity = mainCamera.rotation * input * speed;
+        //velocity = mainCamera.rotation * input * speed;
+        velocity = input * speed;
         velocity.y = 0.0f;
 
         // Rotates player to face the velocity/move direction
