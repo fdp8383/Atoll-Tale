@@ -2,12 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
     public int playerGold;
 
     public int playerHealth;
+
+    public bool isGamePaused = false;
+
+    [SerializeField]
+    private PlayerInput gameManagerInput;
+
+    [SerializeField]
+    private GameObject devToolsMenu;
+
+    [SerializeField]
+    private GameObject pauseMenu;
 
     [SerializeField]
     private TextMeshProUGUI cointText;
@@ -43,6 +55,18 @@ public class GameManager : MonoBehaviour
         }
 
         currentCheckpointPosition = playerController.transform.position;
+
+        // Gets reference to dev tools menu
+        if (!devToolsMenu)
+        {
+            devToolsMenu = GameObject.Find("DevToolsMenu");
+        }
+
+        // Gets reference to dev tools menu
+        if (!pauseMenu)
+        {
+            pauseMenu = GameObject.Find("PauseMenu");
+        }
     }
 
     // Update is called once per frame
@@ -175,5 +199,46 @@ public class GameManager : MonoBehaviour
         {
             pogostickIcon.SetActive(true);
         }
+    }
+
+    /// <summary>
+    /// Toggles the dev tools menu display
+    /// </summary>
+    /// <param name="value"></param>
+    private void OnDevTool(InputValue value)
+    {
+        devToolsMenu.SetActive(!devToolsMenu.activeInHierarchy);
+    }
+
+    /// <summary>
+    /// Toggles game pause
+    /// </summary>
+    /// <param name="value"></param>
+    private void OnPause(InputValue value)
+    {
+        isGamePaused = !isGamePaused;
+        if (isGamePaused)
+        {
+            Time.timeScale = 0.0f;
+            playerController.DisablePlayerInput();
+            pauseMenu.SetActive(true);
+        }
+        else
+        {
+            Time.timeScale = 1.0f;
+            playerController.EnablePlayerInput();
+            pauseMenu.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// Resumes game
+    /// </summary>
+    public void ResumeGame()
+    {
+        isGamePaused = false;
+        Time.timeScale = 1.0f;
+        playerController.EnablePlayerInput();
+        pauseMenu.SetActive(false);
     }
 }

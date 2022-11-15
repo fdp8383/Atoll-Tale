@@ -30,6 +30,11 @@ public class EnemyCannonball : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (gameManager.isGamePaused)
+        {
+            return;
+        }
+
         // If this projectile has reached it's max life span, deactivate it
         lifespanTimer -= Time.deltaTime;
         if (lifespanTimer <= 0)

@@ -38,6 +38,9 @@ public class EnemyBehavior : MonoBehaviour
     [SerializeField]
     private Renderer rend;
 
+    [SerializeField]
+    private GameManager gameManager;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -58,11 +61,21 @@ public class EnemyBehavior : MonoBehaviour
         {
             enemyCannonballManager = GameObject.Find("EnemyCannonballManager").GetComponent<EnemyCannonballManager>();
         }
+
+        if (!gameManager)
+        {
+            gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        }    
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (gameManager.isGamePaused)
+        {
+            return;
+        }
+
         // Only update this enemy if it is not stunned
         if (!isStunned)
         {

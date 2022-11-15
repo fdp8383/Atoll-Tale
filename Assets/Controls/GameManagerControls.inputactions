@@ -1,0 +1,54 @@
+{
+    "name": "GameManagerControls",
+    "maps": [
+        {
+            "name": "GameManager",
+            "id": "a837781b-de41-4f92-bfbf-d5602430486e",
+            "actions": [
+                {
+                    "name": "DevTool",
+                    "type": "Button",
+                    "id": "f59bf511-c45e-49c8-ab9b-6a35bb64eefb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "647d2415-3601-45ae-ac24-95e4e7de3dd3",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "d4c37ac4-a040-4d83-8d1f-f5e51b512a3a",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DevTool",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "709ff195-7671-481f-ad37-515f8b78bf1e",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

@@ -25,9 +25,6 @@ public class PlayerController : MonoBehaviour
     private Animator playerAnimator;
 
     [SerializeField]
-    private GameObject devToolsMenu;
-
-    [SerializeField]
     private Vector3 spawnPoint;
 
     [SerializeField]
@@ -105,12 +102,6 @@ public class PlayerController : MonoBehaviour
             playerController = this.gameObject.GetComponent<CharacterController>();
         }
 
-        // Gets reference to dev tools menu
-        if (!devToolsMenu)
-        {
-            devToolsMenu = GameObject.Find("DevToolsMenu");
-        }
-
         // Set the player spawn point
         spawnPoint = transform.position;
     }
@@ -123,6 +114,11 @@ public class PlayerController : MonoBehaviour
             reset = false;
             return;
         }*/
+
+        if (gameManager.isGamePaused)
+        {
+            return;
+        }
 
         UpdateMovement();
 
@@ -687,15 +683,6 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Toggles the dev tools menu display
-    /// </summary>
-    /// <param name="value"></param>
-    private void OnDevTool(InputValue value)
-    {
-        devToolsMenu.SetActive(!devToolsMenu.activeInHierarchy);
-    }
-
-    /// <summary>
     /// Toggles god mode. When in god mode the player will not take damage from enemies
     /// </summary>
     public void ToggleGodMode()
@@ -995,6 +982,24 @@ public class PlayerController : MonoBehaviour
         velocity = digPosition = Vector3.zero;
         verticalVelocity = invulnerabilityDurationTimer = 0.0f;
         currentInteractable = null;
+        playerInput.actions.Enable();
+    }
+
+    /// <summary>
+    /// Disables player input
+    /// </summary>
+    public void DisablePlayerInput()
+    {
+        // Disable player input
+        playerInput.actions.Disable();
+    }
+
+    /// <summary>
+    /// Enables player input
+    /// </summary>
+    public void EnablePlayerInput()
+    {
+        // Enable player input
         playerInput.actions.Enable();
     }
 }

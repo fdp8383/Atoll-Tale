@@ -38,6 +38,9 @@ public class ShovableObject : MonoBehaviour
 
     public bool isBroken = false;
 
+    [SerializeField]
+    private GameManager gameManager;
+
     // Start is called before the first frame update
     private void Start()
     {
@@ -61,13 +64,18 @@ public class ShovableObject : MonoBehaviour
         {
             objectCollider = GetComponent<BoxCollider>();
         }
+
+        if (!gameManager)
+        {
+            gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        }
     }
 
     // Update is called once per frame
     private void Update()
     {
-        // If this object is in a broken state, skip the update logic
-        if (isBroken)
+        // If this object is in a broken state or the game is paused, skip the update logic
+        if (isBroken || gameManager.isGamePaused)
         {
             return;
         }

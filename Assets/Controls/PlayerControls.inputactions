@@ -67,15 +67,6 @@
                     "processors": "",
                     "interactions": "Press",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "DevTool",
-                    "type": "Button",
-                    "id": "bc3cd892-0d65-429f-850b-c5b1cd61c250",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -274,17 +265,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "ChargedSwing",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "228a8099-ecbd-46d5-a150-b9ffdf30d104",
-                    "path": "<Keyboard>/tab",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "DevTool",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
