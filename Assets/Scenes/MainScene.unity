@@ -65261,7 +65261,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1563302270}
-  m_LocalRotation: {x: 0.12422058, y: 0.00000001759856, z: -0.0000000022031679, w: 0.9922547}
+  m_LocalRotation: {x: 0.12422058, y: -0.000000017598557, z: 0.0000000022031674, w: 0.9922547}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -91387,7 +91387,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8723820947559883616, guid: 3ae22db9ef9d7b04ab6778fcc75791a4, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ToMainMenu
+      value: QuitGame
       objectReference: {fileID: 0}
     - target: {fileID: 8723820947559883622, guid: 3ae22db9ef9d7b04ab6778fcc75791a4, type: 3}
       propertyPath: m_Name
@@ -91395,7 +91395,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8723820947719371156, guid: 3ae22db9ef9d7b04ab6778fcc75791a4, type: 3}
       propertyPath: m_text
-      value: Menu
+      value: Quit
       objectReference: {fileID: 0}
     - target: {fileID: 8723820947859093286, guid: 3ae22db9ef9d7b04ab6778fcc75791a4, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
