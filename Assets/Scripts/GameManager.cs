@@ -48,6 +48,8 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+        Time.timeScale = 1.0f;
+
         // Get reference to player controller script if not set in editor
         if (!playerController)
         {
