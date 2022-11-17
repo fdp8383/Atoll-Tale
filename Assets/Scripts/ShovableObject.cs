@@ -96,9 +96,9 @@ public class ShovableObject : MonoBehaviour
                 beingShoved = false;
                 beingChargedShoved = false;
 
-                //Debug.Log("Got to shove location");
+                Debug.Log("Got to shove location");
 
-                //Debug.Log("Checking for ground");
+                Debug.Log("Checking for ground");
                 // If there is no ground under the object start falling
                 if (!CheckGround())
                 {
@@ -117,7 +117,7 @@ public class ShovableObject : MonoBehaviour
             // Check if there is ground under the object
             if (CheckGround())
             {
-                //Debug.Log("Not falling anymore");
+                Debug.Log("Not falling anymore");
                 isFalling = false;
             }
             else
@@ -140,10 +140,10 @@ public class ShovableObject : MonoBehaviour
 
         if (beingChargedShoved)
         {
-            //Debug.Log("Checking for ground charged shove");
+            Debug.Log("Checking for ground charged shove");
             if (!CheckGround())
             {
-                //Debug.Log("No ground for charged shove");
+                Debug.Log("No ground for charged shove");
                 StartCoroutine(DelayFall());
                 beingChargedShoved = false;
             }

@@ -33,12 +33,21 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Dig",
+                    "type": "Button",
+                    "id": "591fd398-f314-403b-9eab-0b0a742e2cbc",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Swing",
                     "type": "Button",
                     "id": "541c1fff-14d4-433c-a3db-e033ba5e0407",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "",
                     "initialStateCheck": false
                 },
                 {
@@ -130,7 +139,7 @@
                 {
                     "name": "",
                     "id": "59cad98f-73a5-4020-b2ec-bb38cc478541",
-                    "path": "<Mouse>/rightButton",
+                    "path": "<Mouse>/delta",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -173,8 +182,30 @@
                 },
                 {
                     "name": "",
-                    "id": "b5d9068b-91c0-404b-b8f9-bf16d5111e9b",
+                    "id": "c3ce1ae6-bab2-4567-945c-f18eaf9136c9",
                     "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dig",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ccef0a44-6f41-49fc-a9cf-829dfb5c2450",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dig",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b5d9068b-91c0-404b-b8f9-bf16d5111e9b",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

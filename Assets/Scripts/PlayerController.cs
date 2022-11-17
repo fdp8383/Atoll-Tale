@@ -87,11 +87,6 @@ public class PlayerController : MonoBehaviour
 
     public bool godMode = false;
 
-    [SerializeField]
-    private float swingChargeTime = 0f;
-    [SerializeField]
-    private bool isChargingSwing = false;
-
     // Start is called before the first frame update
     private void Start()
     {
@@ -133,11 +128,6 @@ public class PlayerController : MonoBehaviour
             isInvulnerable = false;
             rend.sharedMaterial = playerMaterial;
         }
-
-        if (isChargingSwing)
-        {
-            swingChargeTime += Time.deltaTime;
-        }
     }
 
     /// <summary>
@@ -146,8 +136,8 @@ public class PlayerController : MonoBehaviour
     private void UpdateMovement()
     {
         // Calculates velocity based on the camera's current rotation and input vector
-        velocity = mainCamera.rotation * input * speed;
-        //velocity = input * speed;
+        //velocity = mainCamera.rotation * input * speed;
+        velocity = input * speed;
         velocity.y = 0.0f;
 
         // Rotates player to face the velocity/move direction
@@ -196,11 +186,8 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (!isChargingSwing)
-        {
-            // Moves the player
-            playerController.Move(velocity * Time.deltaTime);
-        }
+        // Moves the player
+        playerController.Move(velocity * Time.deltaTime);
     }
 
     /// <summary>
@@ -211,294 +198,67 @@ public class PlayerController : MonoBehaviour
     {
         // Set input vector
         input = new Vector3(value.Get<Vector2>().x, 0f, value.Get<Vector2>().y);
-        if (isChargingSwing)
-        {
-            playerAnimator.SetBool("isWalking", false);
-        }
-        else
-        {
-            playerAnimator.SetBool("isWalking", true);
-        }
+        playerAnimator.SetBool("isWalking", true);
     }
 
     /// <summary>
-    /// 
+    /// Digs a hole if the player can dig the current block they are standing on
     /// </summary>
     /// <param name="value"></param>
-    private void OnLookRotation(InputValue value)
+    private void OnDig(InputValue value)
     {
-
-    }
-
-    /// <summary>
-    /// Shove/Push an object one unit in the direction the player is facing
-    /// There is some extra logic and math involved due to relative movement
-    /// </summary>
-    /// <param name="value"></param>
-    private void OnSwing(InputValue value)
-    {
-        // If the player does not have the shovel or if the player is jumping, do not shove
+        // If the player does not have the shovel or is jumping, do not dig
         if (!hasShovel || isJumping)
         {
             return;
         }
 
-        if (value.isPressed)
+        // Shoots a raycast out one unit in front of the player to check for ground to dig
+        float heightToFloorOffset = 0.32f;
+        Vector3 targetDigPosition = new Vector3 (transform.position.x + transform.forward.x, transform.position.y - heightToFloorOffset, transform.position.z + transform.forward.z);
+        RaycastHit hit;
+        if (Physics.Linecast(transform.position, targetDigPosition, out hit))
         {
-            Debug.Log("Starting swing charge");
-            isChargingSwing = true;
-        }
-        else
-        {
-            Debug.Log("Stopping swing charge. Total charge time was: " + swingChargeTime);
-            if (swingChargeTime > 0.5f)
+            // Draws a ray for debugging
+            Debug.DrawLine(transform.position, targetDigPosition, Color.red);
+
+            RaycastHit groundCheck;
+            if (Physics.Raycast(hit.transform.position, Vector3.up, out groundCheck, 1.0f))
             {
-                swingChargeTime = Mathf.Clamp(swingChargeTime, 0.51f, 2.49f);
-                swingChargeTime *= 2;
-                Debug.Log("Clamped swing charge time: " + swingChargeTime);
-                // Perform a small/short raycast in front of the player first
-                RaycastHit hit;
-                Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
-                if (Physics.Raycast(transform.position, transform.forward, out hit, 0.99f))
+                if (groundCheck.collider.tag != "Player")
                 {
-                    // Draws a ray for debugging
-                    Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.yellow);
-
-                    // If the collider is shovable, initialize variables used for shoving
-                    if (hit.collider.gameObject.tag == "Shovable")
-                    {
-                        ShovableObject shovableObject;
-                        if (shovableObject = hit.collider.GetComponent<ShovableObject>())
-                        {
-                            if (shovableObject.beingShoved)
-                            {
-                                return;
-                            }
-
-                            // Update gameManager's list of shovable objects moved since last checkpoint
-                            gameManager.UpdateShovableObjectsMovedList(shovableObject);
-
-                            // Calculate target position on grid
-                            Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 5);
-                            float distance = 5;
-                            if (Physics.Linecast(new Vector3(hit.transform.position.x, hit.transform.position.y + 0f, hit.transform.position.z), targetPosition, out hit, 3))
-                            {
-                                distance = Mathf.Floor(Vector3.Distance(shovableObject.transform.position, hit.collider.transform.position));
-                                distance -= 1;
-                                //Debug.Log("Found charged shove target location: " + targetPosition);
-                            }
-                            distance = Mathf.Clamp(distance, 1.0f, Mathf.Ceil(swingChargeTime));
-                            Debug.Log("Distance to travel: " + distance);
-                            targetPosition = CalculateGridPositionInFrontOfPlayer(shovableObject.transform.position, distance);
-
-                            // Call the shove method on the shovable object and start the ShoveAction coroutine
-                            shovableObject.Shove(transform.forward, targetPosition, distance, Mathf.Clamp(distance / 10.0f, 0.2f, 0.5f), 0.05f * distance, true);
-                            StartCoroutine("ShoveAction");
-                        }
-                    }
-                    // If the collider is a projectile, reflect the projectile
-                    else if (hit.collider.gameObject.tag == "Projectile")
-                    {
-                        ReflectProjectile(hit.collider.gameObject, projectileReflectionSpeed + (swingChargeTime * 2));
-                    }
-                    // If the collider is an enemy, stun the enemy
-                    else if (hit.collider.gameObject.tag == "Enemy")
-                    {
-                        EnemyBehavior enemyBehavior = hit.collider.GetComponent<EnemyBehavior>();
-                        if (!enemyBehavior.isStunned)
-                        {
-                            enemyBehavior.StartCoroutine("StunEnemy");
-                        }
-                    }
-                }
-                // Perform a second larger raycast if the first one did not hit anything, this is mainly meant to detect projectiles
-                else if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
-                {
-                    // If the collider hit was a projectile, reflect the projectile
-                    if (hit.collider.gameObject.tag == "Projectile")
-                    {
-                        ReflectProjectile(hit.collider.gameObject, projectileReflectionSpeed + (swingChargeTime * 2));
-                    }
-                }
-            }
-            else
-            {
-                // Perform a small/short raycast in front of the player first
-                RaycastHit hit;
-                Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
-                if (Physics.Raycast(transform.position, transform.forward, out hit, 0.99f))
-                {
-                    Debug.Log("Hit something on swing", hit.collider.gameObject);
-                    // Draws a ray for debugging
-                    Debug.DrawRay(transformPositionHeightOffset, transform.forward * hit.distance, Color.yellow);
-
-                    // If the collider is shovable, initialize variables used for shoving
-                    if (hit.collider.gameObject.tag == "Shovable")
-                    {
-                        ShovableObject shovableObject;
-                        if (shovableObject = hit.collider.GetComponent<ShovableObject>())
-                        {
-                            if (shovableObject.beingShoved)
-                            {
-                                return;
-                            }
-
-                            Debug.Log("Sending shovable object to add to list: " + shovableObject);
-                            // Update gameManager's list of shovable objects moved since last checkpoint
-                            gameManager.UpdateShovableObjectsMovedList(shovableObject);
-
-                            // Calculate target position on grid
-                            Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 1);
-
-                            // Call the shove method on the shovable object and start the ShoveAction coroutine
-                            shovableObject.Shove(transform.forward, targetPosition, 1f, 0.2f, 0.05f, false);
-                            StartCoroutine("ShoveAction");
-                        }
-                    }
-                    // If the collider is a projectile, reflect the projectile
-                    else if (hit.collider.gameObject.tag == "Projectile")
-                    {
-                        ReflectProjectile(hit.collider.gameObject, projectileReflectionSpeed);
-                    }
-                    // If the collider is an enemy, stun the enemy
-                    else if (hit.collider.gameObject.tag == "Enemy")
-                    {
-                        EnemyBehavior enemyBehavior = hit.collider.GetComponent<EnemyBehavior>();
-                        if (!enemyBehavior.isStunned)
-                        {
-                            enemyBehavior.StartCoroutine("StunEnemy");
-                        }
-                    }
-                }
-                // Perform a second larger raycast if the first one did not hit anything, this is mainly meant to detect projectiles
-                else if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
-                {
-                    // If the collider hit was a projectile, reflect the projectile
-                    if (hit.collider.gameObject.tag == "Projectile")
-                    {
-                        ReflectProjectile(hit.collider.gameObject, projectileReflectionSpeed);
-                    }
+                    Debug.Log("Cannot dig at tile hit, there is a block on top of it", groundCheck.collider.gameObject);
+                    return;
                 }
             }
 
-            isChargingSwing = false;
-            swingChargeTime = 0f;
-        }
-    }
-
-    /// <summary>
-    /// Reflects the projectile in the direction the player is facing
-    /// </summary>
-    /// <param name="projectile"></param>
-    private void ReflectProjectile(GameObject projectile, float speed)
-    {
-        EnemyCannonball enemyCannonball;
-        if (enemyCannonball = projectile.GetComponent<EnemyCannonball>())
-        {
-            // Calculate the direction/velocity on the grid to reflect the projectile
-            Vector3 targetVelocity = CalculateGridPositionInFrontOfPlayer(Vector3.zero, 1);
-            enemyCannonball.SetVelocity(targetVelocity);
-            enemyCannonball.SetProjetileSpeed(speed);
-            StartCoroutine("ShoveAction");
-        }
-    }
-
-    /// <summary>
-    /// Restricts player input while the player's shove animation is playing
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator ShoveAction()
-    {
-        // Disable player input
-        playerInput.actions.Disable();
-
-        // TODO: Start shove animation when animation is imported and implemented
-
-        // Wait for shove animation to finish, currently has a placeholder for time
-        yield return new WaitForSeconds(0.5f);
-
-        // Enable player input
-        playerInput.actions.Enable();
-    }
-
-    /// <summary>
-    /// Interacts with an interactable object if possible
-    /// </summary>
-    /// <param name="value"></param>
-    private void OnInteract(InputValue value)
-    {
-        // If there is a current interactable object stored
-        if (currentInteractable && !isJumping && !isChargingSwing)
-        {
-            // And the interactable object has not been interacted with already
-            if (!currentInteractable.GetHasBeenInteracted())
+            if (transform.position.y - hit.transform.position.y < 0.64f)
             {
-                // Call the interactable object's interaction method
-                currentInteractable.DoInteraction();
-                currentInteractable = null;
-            }
-            // Otherwise the interactable object has already been interacted with
-            else
-            {
-                Debug.Log("Interactable object has already been interacted with");
-            }
-        }
-        // Otherwise there is no interactable object in range
-        else
-        {
-            // If the player does not have the shovel or is jumping, do not dig
-            if (!hasShovel || isJumping)
-            {
+                Debug.Log("Cannot dig at tile hit, it is above the current level the player is on");
                 return;
             }
 
-            // Shoots a raycast out one unit in front of the player to check for ground to dig
-            float heightToFloorOffset = 0.32f;
-            Vector3 targetDigPosition = new Vector3(transform.position.x + transform.forward.x, transform.position.y - heightToFloorOffset, transform.position.z + transform.forward.z);
-            RaycastHit hit;
-            if (Physics.Linecast(transform.position, targetDigPosition, out hit))
+            if (Physics.Raycast(transform.position, Vector3.down, out groundCheck, 1.5f))
             {
-                // Draws a ray for debugging
-                Debug.DrawLine(transform.position, targetDigPosition, Color.red);
-
-                RaycastHit groundCheck;
-                if (Physics.Raycast(hit.transform.position, Vector3.up, out groundCheck, 1.0f))
+                if (groundCheck.collider.tag == "GroundRamp")
                 {
-                    if (groundCheck.collider.tag != "Player")
-                    {
-                        Debug.Log("Cannot dig at tile hit, there is a block on top of it", groundCheck.collider.gameObject);
-                        return;
-                    }
-                }
-
-                if (transform.position.y - hit.transform.position.y < 0.64f)
-                {
-                    Debug.Log("Cannot dig at tile hit, it is above the current level the player is on");
+                    Debug.Log("Standing on ramp, cannot dig");
                     return;
                 }
+            }
 
-                if (Physics.Raycast(transform.position, Vector3.down, out groundCheck, 1.5f))
+            if (hit.collider.tag == "Ground" || hit.collider.tag == "GroundTreasure")
+            {
+                // Stores position of groud object to dig
+                digPosition = hit.transform.position;
+
+                // Checks if current object has already been dug by checking if the dug spot of the hit ground tile is active
+                GameObject dugSpot = hit.collider.transform.GetChild(0).gameObject;
+                if (!dugSpot.activeInHierarchy)
                 {
-                    if (groundCheck.collider.tag == "GroundRamp")
-                    {
-                        Debug.Log("Standing on ramp, cannot dig");
-                        return;
-                    }
-                }
-
-                if (hit.collider.tag == "Ground" || hit.collider.tag == "GroundTreasure")
-                {
-                    // Stores position of groud object to dig
-                    digPosition = hit.transform.position;
-
-                    // Checks if current object has already been dug by checking if the dug spot of the hit ground tile is active
-                    GameObject dugSpot = hit.collider.transform.GetChild(0).gameObject;
-                    if (!dugSpot.activeInHierarchy)
-                    {
-                        Debug.Log("Trying to dig on block", hit.collider.gameObject);
-                        // Start dig action coroutine, passes in position and renderer component of ground object to dig
-                        StartCoroutine(DigAction(digPosition, hit.collider.gameObject, dugSpot));
-                    }
+                    Debug.Log("Trying to dig on block", hit.collider.gameObject);
+                    // Start dig action coroutine, passes in position and renderer component of ground object to dig
+                    StartCoroutine(DigAction(digPosition, hit.collider.gameObject, dugSpot));
                 }
             }
         }
@@ -514,6 +274,55 @@ public class PlayerController : MonoBehaviour
     {
         // Disable player input
         playerInput.actions.Disable();
+
+        // Shoot a raycast under the player to find the ground block they are standing on
+        /*RaycastHit hit;
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
+        {
+            if (hit.collider.gameObject.tag == "Ground" || hit.collider.tag == "GroundTreasure")
+            {
+                // Move the player towards the target ground location (center of the current block they are standing on)
+                Vector3 targetGroundLocation = hit.transform.position;
+                targetGroundLocation.y = transform.position.y;
+                Vector3 lookVector;
+                while (Vector3.Distance(transform.position, targetGroundLocation) > 0.05f)
+                {
+                    // Move player towards center of ground block they are standing on
+                    Vector3 tempVelocity = Vector3.MoveTowards(transform.position, targetGroundLocation, (speed / 2) * Time.deltaTime);
+
+                    // Set rotation
+                    lookVector = tempVelocity - transform.position;
+                    transform.rotation = Quaternion.LookRotation(lookVector);
+                    transform.position = tempVelocity;
+                    yield return null;
+                }
+
+                // Once the player is close enough to the position, snap it to the position and set rotation
+                transform.position = targetGroundLocation;
+                lookVector = digPosition - transform.position;
+                lookVector.y = 0;
+                transform.rotation = Quaternion.LookRotation(lookVector);
+
+                // Set current material to the dug material;
+                rend.sharedMaterial = dugMaterial;
+
+                // TODO: Start dig animation when animation is imported and implemented
+
+                // Wait for dig animation to finish, currently has a placeholder for time
+                yield return new WaitForSeconds(2f);
+
+                // Enable player input
+                playerInput.actions.Enable();
+            }
+            else
+            {
+                Debug.LogWarning("No ground under player");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No ground under player");
+        }*/
 
         Vector3 targetGroundLocation = CalculateGridPositionToCenterPlayer(digPosition, 1);
         Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
@@ -619,6 +428,140 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
+    /// Shove/Push an object one unit in the direction the player is facing
+    /// There is some extra logic and math involved due to relative movement
+    /// </summary>
+    /// <param name="value"></param>
+    private void OnSwing(InputValue value)
+    {
+        // If the player does not have the shovel or if the player is jumping, do not shove
+        if (!hasShovel || isJumping)
+        {
+            return;
+        }
+
+        // Perform a small/short raycast in front of the player first
+        RaycastHit hit;
+        Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 0.99f))
+        {
+            Debug.Log("Hit something on swing", hit.collider.gameObject);
+            // Draws a ray for debugging
+            Debug.DrawRay(transformPositionHeightOffset, transform.forward * hit.distance, Color.yellow);
+
+            // If the collider is shovable, initialize variables used for shoving
+            if (hit.collider.gameObject.tag == "Shovable")
+            {
+                ShovableObject shovableObject;
+                if (shovableObject = hit.collider.GetComponent<ShovableObject>())
+                {
+                    if (shovableObject.beingShoved)
+                    {
+                        return;
+                    }
+
+                    Debug.Log("Sending shovable object to add to list: " + shovableObject);
+                    // Update gameManager's list of shovable objects moved since last checkpoint
+                    gameManager.UpdateShovableObjectsMovedList(shovableObject);
+
+                    // Calculate target position on grid
+                    Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 1);
+
+                    // Call the shove method on the shovable object and start the ShoveAction coroutine
+                    shovableObject.Shove(transform.forward, targetPosition, 1f, 0.2f, 0.05f, false);
+                    StartCoroutine("ShoveAction");
+                }
+            }
+            // If the collider is a projectile, reflect the projectile
+            else if (hit.collider.gameObject.tag == "Projectile")
+            {
+                ReflectProjectile(hit.collider.gameObject);
+            }
+            // If the collider is an enemy, stun the enemy
+            else if (hit.collider.gameObject.tag == "Enemy")
+            {
+                EnemyBehavior enemyBehavior = hit.collider.GetComponent<EnemyBehavior>();
+                if (!enemyBehavior.isStunned)
+                {
+                    enemyBehavior.StartCoroutine("StunEnemy");
+                }
+            }
+        }
+        // Perform a second larger raycast if the first one did not hit anything, this is mainly meant to detect projectiles
+        else if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
+        {
+            // If the collider hit was a projectile, reflect the projectile
+            if (hit.collider.gameObject.tag == "Projectile")
+            {
+                ReflectProjectile(hit.collider.gameObject);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Reflects the projectile in the direction the player is facing
+    /// </summary>
+    /// <param name="projectile"></param>
+    private void ReflectProjectile(GameObject projectile)
+    {
+        EnemyCannonball enemyCannonball;
+        if (enemyCannonball = projectile.GetComponent<EnemyCannonball>())
+        {
+            // Calculate the direction/velocity on the grid to reflect the projectile
+            Vector3 targetVelocity = CalculateGridPositionInFrontOfPlayer(Vector3.zero, 1);
+            enemyCannonball.SetVelocity(targetVelocity);
+            enemyCannonball.SetProjetileSpeed(projectileReflectionSpeed);
+            StartCoroutine("ShoveAction");
+        }
+    }
+
+    /// <summary>
+    /// Restricts player input while the player's shove animation is playing
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator ShoveAction()
+    {
+        // Disable player input
+        playerInput.actions.Disable();
+
+        // TODO: Start shove animation when animation is imported and implemented
+
+        // Wait for shove animation to finish, currently has a placeholder for time
+        yield return new WaitForSeconds(0.5f);
+
+        // Enable player input
+        playerInput.actions.Enable();
+    }
+
+    /// <summary>
+    /// Interacts with an interactable object if possible
+    /// </summary>
+    /// <param name="value"></param>
+    private void OnInteract(InputValue value)
+    {
+        // If there is a current interactable object stored
+        if (currentInteractable && !isJumping)
+        {
+            // And the interactable object has not been interacted with already
+            if (!currentInteractable.GetHasBeenInteracted())
+            {
+                // Call the interactable object's interaction method
+                currentInteractable.DoInteraction();
+            }
+            // Otherwise the interactable object has already been interacted with
+            else
+            {
+                Debug.Log("Interactable object has already been interacted with");
+            }
+        }
+        // Otherwise there is no interactable object in range
+        else
+        {
+            Debug.Log("No interactable object in range");
+        }
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="value"></param>
@@ -628,6 +571,46 @@ public class PlayerController : MonoBehaviour
         if (!hasShovel || isJumping)
         {
             return;
+        }
+
+        // Perform a small/short raycast in front of the player first
+        RaycastHit hit;
+        //Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 0.99f))
+        {
+            // Draws a ray for debugging
+            Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.yellow);
+
+            // If the collider is shovable, initialize variables used for shoving
+            if (hit.collider.gameObject.tag == "Shovable")
+            {
+                ShovableObject shovableObject;
+                if (shovableObject = hit.collider.GetComponent<ShovableObject>())
+                {
+                    if (shovableObject.beingShoved)
+                    {
+                        return;
+                    }
+
+                    // Update gameManager's list of shovable objects moved since last checkpoint
+                    gameManager.UpdateShovableObjectsMovedList(shovableObject);
+
+                    // Calculate target position on grid
+                    Vector3 targetPosition = CalculateGridPositionInFrontOfPlayer(hit.collider.transform.position, 5);
+                    float distance = 5;
+                    if (Physics.Linecast(new Vector3(hit.transform.position.x, hit.transform.position.y + 0f, hit.transform.position.z), targetPosition, out hit, 3))
+                    {
+                        distance = Mathf.Floor(Vector3.Distance(shovableObject.transform.position, hit.collider.transform.position));
+                        distance -= 1;
+                        targetPosition = CalculateGridPositionInFrontOfPlayer(shovableObject.transform.position, distance);
+                        Debug.Log("Found charged shove target location: " + targetPosition);
+                    }
+
+                    // Call the shove method on the shovable object and start the ShoveAction coroutine
+                    shovableObject.Shove(transform.forward, targetPosition, distance, Mathf.Clamp(distance / 10.0f, 0.2f, 0.5f), 0.05f * distance, true);
+                    StartCoroutine("ShoveAction");
+                }
+            }
         }
     }
 
@@ -639,8 +622,8 @@ public class PlayerController : MonoBehaviour
     {
         // TODO: Add some way to check what the current active special ability is then execute that specific special ability logic
 
-        // If the player does not have the pogo stick or is currently charging a swing, do not execute the special ability logic
-        if (!hasPogoStick && isChargingSwing)
+        // If the player does not have the pogo stick, do not execute the special ability logic
+        if (!hasPogoStick)
         {
             return;
         }
@@ -749,9 +732,6 @@ public class PlayerController : MonoBehaviour
     {
         // Disable player input
         playerInput.actions.Disable();
-
-        isChargingSwing = false;
-        swingChargeTime = 0.0f;
 
         rend.sharedMaterial = playerDamagedMaterial;
 
@@ -998,9 +978,9 @@ public class PlayerController : MonoBehaviour
     {
         StopAllCoroutines();
         rend.sharedMaterial = playerMaterial;
-        startJump = isJumping = successfulJump = isInvulnerable = isChargingSwing = false;
+        startJump = isJumping = successfulJump = isInvulnerable = false;
         velocity = digPosition = Vector3.zero;
-        verticalVelocity = invulnerabilityDurationTimer = swingChargeTime = 0.0f;
+        verticalVelocity = invulnerabilityDurationTimer = 0.0f;
         currentInteractable = null;
         playerInput.actions.Enable();
     }
