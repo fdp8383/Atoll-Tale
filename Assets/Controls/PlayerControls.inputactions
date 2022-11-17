@@ -15,15 +15,6 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "LookRotation",
-                    "type": "Value",
-                    "id": "478902d8-d91d-437c-935e-564c8c005b7e",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
                     "name": "Interact",
                     "type": "Button",
                     "id": "ff0e670a-3db6-462e-968b-6a3aa86717be",
@@ -48,15 +39,6 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "ChargedSwing",
-                    "type": "Button",
-                    "id": "8206a440-3a96-43f4-8326-8c9ad9d12cd3",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "Press",
                     "initialStateCheck": false
                 }
             ],
@@ -129,28 +111,6 @@
                 },
                 {
                     "name": "",
-                    "id": "59cad98f-73a5-4020-b2ec-bb38cc478541",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "LookRotation",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "2a4e23f5-db02-40ae-a056-eadfc8c9d9f1",
-                    "path": "<Gamepad>/rightStick",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "LookRotation",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "c2e2e70b-643f-4804-9b1f-7526539aa517",
                     "path": "<Keyboard>/e",
                     "interactions": "",
@@ -212,28 +172,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "SpecialAbility",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "79411854-dae8-40d0-9901-816bf2b8337a",
-                    "path": "<Keyboard>/leftShift",
-                    "interactions": "Press",
-                    "processors": "",
-                    "groups": "",
-                    "action": "ChargedSwing",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d6ce520d-a32e-4e54-b36b-5b7b5235884e",
-                    "path": "<Gamepad>/rightTrigger",
-                    "interactions": "Press",
-                    "processors": "",
-                    "groups": "",
-                    "action": "ChargedSwing",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

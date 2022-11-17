@@ -114,12 +114,6 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        /*if (reset)
-        {
-            reset = false;
-            return;
-        }*/
-
         if (gameManager.isGamePaused)
         {
             return;
@@ -137,6 +131,12 @@ public class PlayerController : MonoBehaviour
         if (isChargingSwing)
         {
             swingChargeTime += Time.deltaTime;
+
+            if (swingChargeTime >= 2.5f)
+            {
+                playerAnimator.SetBool("isChargingSwingFull", true);
+                playerAnimator.SetBool("isChargingSwing", false);
+            }
         }
     }
 
@@ -222,15 +222,6 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="value"></param>
-    private void OnLookRotation(InputValue value)
-    {
-
-    }
-
-    /// <summary>
     /// Shove/Push an object one unit in the direction the player is facing
     /// There is some extra logic and math involved due to relative movement
     /// </summary>
@@ -247,6 +238,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("Starting swing charge");
             isChargingSwing = true;
+            playerAnimator.SetBool("isChargingSwing", true);
         }
         else
         {
@@ -381,9 +373,23 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
+            StartCoroutine("SwingAction");
             isChargingSwing = false;
             swingChargeTime = 0f;
         }
+    }
+
+    private IEnumerator SwingAction()
+    {
+        playerInput.actions.Disable();
+        playerAnimator.SetBool("isSwinging", true);
+        playerAnimator.SetBool("isChargingSwing", false);
+        playerAnimator.SetBool("isChargingSwingFull", false);
+
+        yield return new WaitForSeconds(0.5f);
+
+        playerAnimator.SetBool("isSwinging", false);
+        playerInput.actions.Enable();
     }
 
     /// <summary>
@@ -560,7 +566,11 @@ public class PlayerController : MonoBehaviour
                     lookVector = digPosition - transform.position;
                     lookVector.y = 0;
                     transform.rotation = Quaternion.LookRotation(lookVector);
+                    playerAnimator.SetBool("isDigging", true);
                     playerAnimator.SetBool("isWalking", false);
+
+                    // Wait for dig animation to finish, currently has a placeholder for time
+                    yield return new WaitForSeconds(0.5f);
 
                     // Set dug spot of hit ground tile to active;
                     dugSpot.SetActive(true);
@@ -599,10 +609,7 @@ public class PlayerController : MonoBehaviour
                         }
                     }
 
-                    // TODO: Start dig animation when animation is imported and implemented
-
-                    // Wait for dig animation to finish, currently has a placeholder for time
-                    yield return new WaitForSeconds(0.1f);
+                    playerAnimator.SetBool("isDigging", false);
 
                     // Enable player input
                     playerInput.actions.Enable();
@@ -615,19 +622,6 @@ public class PlayerController : MonoBehaviour
                 playerInput.actions.Enable();
                 yield return null;
             }
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="value"></param>
-    private void OnChargedSwing(InputValue value)
-    {
-        // If the player does not have the shovel or if the player is jumping, do not shove
-        if (!hasShovel || isJumping)
-        {
-            return;
         }
     }
 
