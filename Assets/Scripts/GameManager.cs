@@ -67,6 +67,8 @@ public class GameManager : MonoBehaviour
         {
             pauseMenu = GameObject.Find("PauseMenu");
         }
+
+        Cursor.visible = false;
     }
 
     // Update is called once per frame
@@ -208,6 +210,7 @@ public class GameManager : MonoBehaviour
     private void OnDevTool(InputValue value)
     {
         devToolsMenu.SetActive(!devToolsMenu.activeInHierarchy);
+        Cursor.visible = devToolsMenu.activeInHierarchy;
     }
 
     /// <summary>
@@ -222,12 +225,14 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 0.0f;
             playerController.DisablePlayerInput();
             pauseMenu.SetActive(true);
+            Cursor.visible = true;
         }
         else
         {
             Time.timeScale = 1.0f;
             playerController.EnablePlayerInput();
             pauseMenu.SetActive(false);
+            Cursor.visible = devToolsMenu.activeInHierarchy;
         }
     }
 
@@ -240,5 +245,6 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1.0f;
         playerController.EnablePlayerInput();
         pauseMenu.SetActive(false);
+        Cursor.visible = devToolsMenu.activeInHierarchy;
     }
 }
