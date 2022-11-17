@@ -746,6 +746,9 @@ public class PlayerController : MonoBehaviour
 
         isChargingSwing = false;
         swingChargeTime = 0.0f;
+        playerAnimator.SetBool("isSwinging", false);
+        playerAnimator.SetBool("isChargingSwing", false);
+        playerAnimator.SetBool("isChargingSwingFull", false);
 
         rend.sharedMaterial = playerDamagedMaterial;
 
