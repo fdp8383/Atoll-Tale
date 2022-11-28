@@ -10097,6 +10097,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3c0ffcaba5532bc428c28ee0ff50f321, type: 3}
+      propertyPath: m_TagString
+      value: Ocean
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3c0ffcaba5532bc428c28ee0ff50f321, type: 3}
 --- !u!4 &197535846 stripped

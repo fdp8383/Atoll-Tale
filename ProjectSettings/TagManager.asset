@@ -18,6 +18,7 @@ TagManager:
   - InvisiblePuzzleWall
   - GroundRamp
   - PlayerReflectionHitbox
+  - Ocean
   layers:
   - Default
   - TransparentFX
