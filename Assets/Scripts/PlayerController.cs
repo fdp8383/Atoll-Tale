@@ -775,6 +775,10 @@ public class PlayerController : MonoBehaviour
             spawnPoint.y = transform.position.y;
             gameManager.UpdatePlayerCheckpoint(other.gameObject);
         }
+        else if (other.gameObject.tag == "Ocean")
+        {
+            gameManager.ResetPlayer();
+        }
     }
 
     private void OnTriggerExit(Collider other)
