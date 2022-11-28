@@ -65,6 +65,7 @@ public class PlayerController : MonoBehaviour
     private float heightOffset = 0.49f;
 
     private InteractableObject currentInteractable;
+    public EnemyCannonball currentProjectile;
 
     [SerializeField]
     private Renderer rend;
@@ -288,11 +289,6 @@ public class PlayerController : MonoBehaviour
                             StartCoroutine("ShoveAction");
                         }
                     }
-                    // If the collider is a projectile, reflect the projectile
-                    else if (hit.collider.gameObject.tag == "Projectile")
-                    {
-                        ReflectProjectile(hit.collider.gameObject, projectileReflectionSpeed + (swingChargeTime * 2));
-                    }
                     // If the collider is an enemy, stun the enemy
                     else if (hit.collider.gameObject.tag == "Enemy")
                     {
@@ -303,14 +299,10 @@ public class PlayerController : MonoBehaviour
                         }
                     }
                 }
-                // Perform a second larger raycast if the first one did not hit anything, this is mainly meant to detect projectiles
-                else if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
+                // If nothing was hit by the raycast, check if a projectile is in the player's reflection hitbox. If there is a projectile, reflect
+                else if (currentProjectile != null)
                 {
-                    // If the collider hit was a projectile, reflect the projectile
-                    if (hit.collider.gameObject.tag == "Projectile")
-                    {
-                        ReflectProjectile(hit.collider.gameObject, projectileReflectionSpeed + (swingChargeTime * 2));
-                    }
+                    ReflectProjectile(currentProjectile, projectileReflectionSpeed + (swingChargeTime * 2));
                 }
             }
             else
@@ -347,11 +339,6 @@ public class PlayerController : MonoBehaviour
                             StartCoroutine("ShoveAction");
                         }
                     }
-                    // If the collider is a projectile, reflect the projectile
-                    else if (hit.collider.gameObject.tag == "Projectile")
-                    {
-                        ReflectProjectile(hit.collider.gameObject, projectileReflectionSpeed);
-                    }
                     // If the collider is an enemy, stun the enemy
                     else if (hit.collider.gameObject.tag == "Enemy")
                     {
@@ -362,14 +349,10 @@ public class PlayerController : MonoBehaviour
                         }
                     }
                 }
-                // Perform a second larger raycast if the first one did not hit anything, this is mainly meant to detect projectiles
-                else if (Physics.SphereCast(transformPositionHeightOffset, 0.5f, transform.forward, out hit, 2.5f))
+                // If nothing was hit by the raycast, check if a projectile is in the player's reflection hitbox. If there is a projectile, reflect
+                else if (currentProjectile != null)
                 {
-                    // If the collider hit was a projectile, reflect the projectile
-                    if (hit.collider.gameObject.tag == "Projectile")
-                    {
-                        ReflectProjectile(hit.collider.gameObject, projectileReflectionSpeed);
-                    }
+                    ReflectProjectile(currentProjectile, projectileReflectionSpeed);
                 }
             }
 
@@ -396,17 +379,13 @@ public class PlayerController : MonoBehaviour
     /// Reflects the projectile in the direction the player is facing
     /// </summary>
     /// <param name="projectile"></param>
-    private void ReflectProjectile(GameObject projectile, float speed)
+    private void ReflectProjectile(EnemyCannonball projectile, float speed)
     {
-        EnemyCannonball enemyCannonball;
-        if (enemyCannonball = projectile.GetComponent<EnemyCannonball>())
-        {
-            // Calculate the direction/velocity on the grid to reflect the projectile
-            Vector3 targetVelocity = CalculateGridPositionInFrontOfPlayer(Vector3.zero, 1);
-            enemyCannonball.SetVelocity(targetVelocity);
-            enemyCannonball.SetProjetileSpeed(speed);
-            StartCoroutine("ShoveAction");
-        }
+        // Calculate the direction/velocity on the grid to reflect the projectile
+        Vector3 targetVelocity = CalculateGridPositionInFrontOfPlayer(Vector3.zero, 1);
+        projectile.SetVelocity(targetVelocity);
+        projectile.SetProjetileSpeed(speed);
+        StartCoroutine("ShoveAction");
     }
 
     /// <summary>

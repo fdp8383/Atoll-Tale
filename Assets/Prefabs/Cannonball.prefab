@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8791596895206174597}
   - component: {fileID: 5394404276219424617}
   - component: {fileID: -6440095435044924922}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Cannonball
   m_TagString: Projectile
   m_Icon: {fileID: 0}
@@ -114,6 +114,7 @@ MonoBehaviour:
   speed: 3
   baseSpeed: 3
   maxLifespan: 8
+  gameManager: {fileID: 0}
 --- !u!54 &-6440095435044924922
 Rigidbody:
   m_ObjectHideFlags: 0

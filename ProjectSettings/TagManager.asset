@@ -17,6 +17,7 @@ TagManager:
   - Checkpoint
   - InvisiblePuzzleWall
   - GroundRamp
+  - PlayerReflectionHitbox
   layers:
   - Default
   - TransparentFX

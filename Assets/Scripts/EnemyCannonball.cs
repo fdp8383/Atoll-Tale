@@ -101,6 +101,10 @@ public class EnemyCannonball : MonoBehaviour
                 gameManager.UpdatePlayerHealth(-1);
             }
         }
+        else if (objectTag == "PlayerReflectionHitbox")
+        {
+            return;
+        }
 
         // Deactivate the projectile
         DeactivateProjectile();
