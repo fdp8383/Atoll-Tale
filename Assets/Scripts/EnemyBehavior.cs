@@ -20,6 +20,9 @@ public class EnemyBehavior : MonoBehaviour
     private float enemyDetectionDistance = 15.0f;
 
     [SerializeField]
+    private bool canTurn = true;
+
+    [SerializeField]
     private Transform playerTransform;
 
     private bool isPlayerInRange = false;
@@ -79,8 +82,11 @@ public class EnemyBehavior : MonoBehaviour
         // Only update this enemy if it is not stunned
         if (!isStunned)
         {
-            // Update the rotation to face the player
-            FacePlayerDirection();
+            if (canTurn)
+            {
+                // Update the rotation to face the player
+                FacePlayerDirection();
+            }
 
             // If the cooldown timer reaches 0, and the player is in range, 
             // fire a projectile and reset the cooldown timer

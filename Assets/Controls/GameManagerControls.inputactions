@@ -31,6 +31,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "CameraMovementSingle",
+                    "type": "PassThrough",
+                    "id": "1b689764-a02f-4451-bc3e-d14daf39fe0d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -88,6 +97,17 @@
                     "action": "CameraMovement",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "8a568163-1b89-4093-8331-f7d2769e61ea",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraMovementSingle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

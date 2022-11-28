@@ -460,7 +460,7 @@ public class PlayerController : MonoBehaviour
 
             // Shoots a raycast out one unit in front of the player to check for ground to dig
             float heightToFloorOffset = 0.32f;
-            Vector3 targetDigPosition = new Vector3(transform.position.x + transform.forward.x, transform.position.y - heightToFloorOffset, transform.position.z + transform.forward.z);
+            Vector3 targetDigPosition = new Vector3(transform.position.x + (transform.forward.x * 1.5f), transform.position.y - heightToFloorOffset, transform.position.z + (transform.forward.z * 1.5f));
             RaycastHit hit;
             if (Physics.Linecast(transform.position, targetDigPosition, out hit))
             {
@@ -547,7 +547,7 @@ public class PlayerController : MonoBehaviour
                 }
                 else
                 {
-                    Vector3 lookVector;
+                    /*Vector3 lookVector;
                     Debug.Log("Trying to move to target location: " + targetGroundLocation);
                     while (Vector3.Distance(transform.position, targetGroundLocation) > 0.05f)
                     {
@@ -565,7 +565,7 @@ public class PlayerController : MonoBehaviour
                     transform.position = targetGroundLocation;
                     lookVector = digPosition - transform.position;
                     lookVector.y = 0;
-                    transform.rotation = Quaternion.LookRotation(lookVector);
+                    transform.rotation = Quaternion.LookRotation(lookVector);*/
                     playerAnimator.SetBool("isDigging", true);
                     playerAnimator.SetBool("isWalking", false);
 
@@ -588,18 +588,7 @@ public class PlayerController : MonoBehaviour
                             // If there is an object to the right of the player, move the treasure chest to behind the player
                             Vector3 treasurePosition = groundTileHit.transform.position;
                             treasurePosition.y += 1;
-                            /*Vector3 targetTreasurePosition = CalculateGridPositionInFrontOfPlayer(treasurePosition, 2);
-                            RaycastHit hit;
-                            if (Physics.Raycast(treasurePosition, transform.forward, out hit, 2.0f))
-                            {
-                                Debug.Log("Calculating treasure position to right of player");
-                                targetTreasurePosition = CalculateGridPositionToRightOfPlayer(treasurePosition, 2);
-                                if (Physics.Raycast(treasurePosition, transform.right, out hit, 2.0f))
-                                {
-                                    Debug.Log("Calculating treasure position behind player");
-                                    targetTreasurePosition = CalculateGridPositionBehindPlayer(treasurePosition, 2);
-                                }
-                            }*/
+
                             // Calls the DigUpTreasure method on the ground treasure object
                             groundTreasure.DigUpTreasure(treasurePosition);
                         }
@@ -634,7 +623,7 @@ public class PlayerController : MonoBehaviour
         // TODO: Add some way to check what the current active special ability is then execute that specific special ability logic
 
         // If the player does not have the pogo stick or is currently charging a swing, do not execute the special ability logic
-        if (!hasPogoStick && isChargingSwing)
+        if (!hasPogoStick || isChargingSwing)
         {
             return;
         }
