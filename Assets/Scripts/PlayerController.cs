@@ -55,6 +55,11 @@ public class PlayerController : MonoBehaviour
 
     private float verticalVelocity;
 
+    [SerializeField]
+    private bool isInDigPreview = false;
+    [SerializeField]
+    private GameObject digTilePreview;
+    private GameObject currentDigTile;
     private Vector3 digPosition;
 
     private bool startJump = false;
@@ -108,6 +113,15 @@ public class PlayerController : MonoBehaviour
             playerController = this.gameObject.GetComponent<CharacterController>();
         }
 
+        if (!digTilePreview)
+        {
+            digTilePreview = gameManager.transform.GetChild(0).gameObject;
+            if (digTilePreview.name != "DigTilePreview")
+            {
+                Debug.LogWarning("DigTilePreview may not be set correctly", this.gameObject);
+            }
+        }
+
         // Set the player spawn point
         spawnPoint = transform.position;
     }
@@ -138,6 +152,11 @@ public class PlayerController : MonoBehaviour
                 playerAnimator.SetBool("isChargingSwingFull", true);
                 playerAnimator.SetBool("isChargingSwing", false);
             }
+        }
+
+        if (isInDigPreview)
+        {
+            UpdateDigPreview();
         }
     }
 
@@ -230,7 +249,7 @@ public class PlayerController : MonoBehaviour
     private void OnSwing(InputValue value)
     {
         // If the player does not have the shovel or if the player is jumping, do not shove
-        if (!hasShovel || isJumping)
+        if (!hasShovel || isJumping || isInDigPreview)
         {
             return;
         }
@@ -412,79 +431,116 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnInteract(InputValue value)
     {
-        // If there is a current interactable object stored
-        if (currentInteractable && !isJumping && !isChargingSwing)
+        if (isChargingSwing || isJumping)
         {
-            // And the interactable object has not been interacted with already
-            if (!currentInteractable.GetHasBeenInteracted())
+            return;
+        }
+
+        if (value.isPressed)
+        {
+            isInDigPreview = true;
+            // If there is a current interactable object stored
+            if (currentInteractable && !isJumping && !isChargingSwing)
             {
-                // Call the interactable object's interaction method
-                currentInteractable.DoInteraction();
-                currentInteractable = null;
+                // And the interactable object has not been interacted with already
+                if (!currentInteractable.GetHasBeenInteracted())
+                {
+                    // Call the interactable object's interaction method
+                    currentInteractable.DoInteraction();
+                    currentInteractable = null;
+                }
+                // Otherwise the interactable object has already been interacted with
+                else
+                {
+                    Debug.Log("Interactable object has already been interacted with");
+                }
+                isInDigPreview = false;
             }
-            // Otherwise the interactable object has already been interacted with
+            // Otherwise there is no interactable object in range
             else
             {
-                Debug.Log("Interactable object has already been interacted with");
+                // If the player does not have the shovel, do not dig
+                if (!hasShovel)
+                {
+                    isInDigPreview = false;
+                }
             }
         }
-        // Otherwise there is no interactable object in range
         else
         {
-            // If the player does not have the shovel or is jumping, do not dig
-            if (!hasShovel || isJumping)
+            if (!isInDigPreview)
             {
                 return;
             }
 
-            // Shoots a raycast out one unit in front of the player to check for ground to dig
-            float heightToFloorOffset = 0.32f;
-            Vector3 targetDigPosition = new Vector3(transform.position.x + (transform.forward.x * 1.5f), transform.position.y - heightToFloorOffset, transform.position.z + (transform.forward.z * 1.5f));
-            RaycastHit hit;
-            if (Physics.Linecast(transform.position, targetDigPosition, out hit))
+            // Checks if current object has already been dug by checking if the dug spot of the hit ground tile is active
+            GameObject dugSpot = currentDigTile.transform.GetChild(0).gameObject;
+            if (!dugSpot.activeInHierarchy)
             {
-                // Draws a ray for debugging
-                Debug.DrawLine(transform.position, targetDigPosition, Color.red);
+                Debug.Log("Trying to dig on block", currentDigTile);
+                // Start dig action coroutine, passes in position and renderer component of ground object to dig
+                StartCoroutine(DigAction(digPosition, currentDigTile, dugSpot));
+            }
 
-                RaycastHit groundCheck;
-                if (Physics.Raycast(hit.transform.position, Vector3.up, out groundCheck, 1.0f))
-                {
-                    if (groundCheck.collider.tag != "Player")
-                    {
-                        Debug.Log("Cannot dig at tile hit, there is a block on top of it", groundCheck.collider.gameObject);
-                        return;
-                    }
-                }
+            isInDigPreview = false;
+            digTilePreview.SetActive(false);
+            currentDigTile = null;
+            digPosition = Vector3.zero;
+        }   
+    }
 
-                if (transform.position.y - hit.transform.position.y < 0.64f)
+    private void UpdateDigPreview()
+    {
+        // Shoots a raycast out one unit in front of the player to check for ground to dig
+        float heightToFloorOffset = 0.32f;
+        Vector3 targetDigPosition = new Vector3(transform.position.x + (transform.forward.x * 1.5f), transform.position.y - heightToFloorOffset, transform.position.z + (transform.forward.z * 1.5f));
+        RaycastHit hit;
+        if (Physics.Linecast(transform.position, targetDigPosition, out hit))
+        {
+            // Draws a ray for debugging
+            Debug.DrawLine(transform.position, targetDigPosition, Color.red);
+
+            RaycastHit groundCheck;
+            if (Physics.Raycast(hit.transform.position, Vector3.up, out groundCheck, 1.0f))
+            {
+                if (groundCheck.collider.tag != "Player")
                 {
-                    Debug.Log("Cannot dig at tile hit, it is above the current level the player is on");
+                    Debug.Log("Cannot dig at tile hit, there is a block on top of it", groundCheck.collider.gameObject);
+                    digPosition = Vector3.zero;
+                    digTilePreview.SetActive(false);
+                    currentDigTile = null;
                     return;
                 }
+            }
 
-                if (Physics.Raycast(transform.position, Vector3.down, out groundCheck, 1.5f))
+            if (transform.position.y - hit.transform.position.y < 0.64f)
+            {
+                Debug.Log("Cannot dig at tile hit, it is above the current level the player is on");
+                digPosition = Vector3.zero;
+                digTilePreview.SetActive(false);
+                currentDigTile = null;
+                return;
+            }
+
+            if (Physics.Raycast(transform.position, Vector3.down, out groundCheck, 1.5f))
+            {
+                if (groundCheck.collider.tag == "GroundRamp")
                 {
-                    if (groundCheck.collider.tag == "GroundRamp")
-                    {
-                        Debug.Log("Standing on ramp, cannot dig");
-                        return;
-                    }
+                    Debug.Log("Standing on ramp, cannot dig");
+                    digPosition = Vector3.zero;
+                    digTilePreview.SetActive(false);
+                    currentDigTile = null;
+                    return;
                 }
+            }
 
-                if (hit.collider.tag == "Ground" || hit.collider.tag == "GroundTreasure")
-                {
-                    // Stores position of groud object to dig
-                    digPosition = hit.transform.position;
-
-                    // Checks if current object has already been dug by checking if the dug spot of the hit ground tile is active
-                    GameObject dugSpot = hit.collider.transform.GetChild(0).gameObject;
-                    if (!dugSpot.activeInHierarchy)
-                    {
-                        Debug.Log("Trying to dig on block", hit.collider.gameObject);
-                        // Start dig action coroutine, passes in position and renderer component of ground object to dig
-                        StartCoroutine(DigAction(digPosition, hit.collider.gameObject, dugSpot));
-                    }
-                }
+            if (hit.collider.tag == "Ground" || hit.collider.tag == "GroundTreasure")
+            {
+                // Stores position and game object of ground object to dig
+                digPosition = hit.transform.position;
+                currentDigTile = hit.collider.gameObject;
+                digTilePreview.SetActive(true);
+                digTilePreview.transform.position = new Vector3(digPosition.x, digPosition.y + 0.55f, digPosition.z);
             }
         }
     }
@@ -602,7 +658,7 @@ public class PlayerController : MonoBehaviour
         // TODO: Add some way to check what the current active special ability is then execute that specific special ability logic
 
         // If the player does not have the pogo stick or is currently charging a swing, do not execute the special ability logic
-        if (!hasPogoStick || isChargingSwing)
+        if (!hasPogoStick || isChargingSwing || isInDigPreview)
         {
             return;
         }
