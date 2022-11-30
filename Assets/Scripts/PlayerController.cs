@@ -431,6 +431,35 @@ public class PlayerController : MonoBehaviour
     /// <param name="value"></param>
     private void OnInteract(InputValue value)
     {
+        if (isChargingSwing || isJumping || isInDigPreview)
+        {
+            return;
+        }
+
+        // If there is a current interactable object stored
+        if (currentInteractable)
+        {
+            // And the interactable object has not been interacted with already
+            if (!currentInteractable.GetHasBeenInteracted())
+            {
+                // Call the interactable object's interaction method
+                currentInteractable.DoInteraction();
+                currentInteractable = null;
+            }
+            // Otherwise the interactable object has already been interacted with
+            else
+            {
+                Debug.Log("Interactable object has already been interacted with");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Digs on tile if possible
+    /// </summary>
+    /// <param name="value"></param>
+    private void OnDig(InputValue value)
+    {
         if (isChargingSwing || isJumping)
         {
             return;
@@ -438,55 +467,34 @@ public class PlayerController : MonoBehaviour
 
         if (value.isPressed)
         {
-            isInDigPreview = true;
-            // If there is a current interactable object stored
-            if (currentInteractable && !isJumping && !isChargingSwing)
+            // If the player does not have the shovel, do not dig
+            if (hasShovel)
             {
-                // And the interactable object has not been interacted with already
-                if (!currentInteractable.GetHasBeenInteracted())
-                {
-                    // Call the interactable object's interaction method
-                    currentInteractable.DoInteraction();
-                    currentInteractable = null;
-                }
-                // Otherwise the interactable object has already been interacted with
-                else
-                {
-                    Debug.Log("Interactable object has already been interacted with");
-                }
-                isInDigPreview = false;
+                isInDigPreview = true;
             }
-            // Otherwise there is no interactable object in range
             else
             {
-                // If the player does not have the shovel, do not dig
-                if (!hasShovel)
-                {
-                    isInDigPreview = false;
-                }
+                isInDigPreview = false;
             }
         }
         else
         {
-            if (!isInDigPreview)
+            if (currentDigTile)
             {
-                return;
+                // Checks if current object has already been dug by checking if the dug spot of the hit ground tile is active
+                GameObject dugSpot = currentDigTile.transform.GetChild(0).gameObject;
+                if (!dugSpot.activeInHierarchy)
+                {
+                    Debug.Log("Trying to dig on block", currentDigTile);
+                    // Start dig action coroutine, passes in position and renderer component of ground object to dig
+                    StartCoroutine(DigAction(digPosition, currentDigTile, dugSpot));
+                }
             }
-
-            // Checks if current object has already been dug by checking if the dug spot of the hit ground tile is active
-            GameObject dugSpot = currentDigTile.transform.GetChild(0).gameObject;
-            if (!dugSpot.activeInHierarchy)
-            {
-                Debug.Log("Trying to dig on block", currentDigTile);
-                // Start dig action coroutine, passes in position and renderer component of ground object to dig
-                StartCoroutine(DigAction(digPosition, currentDigTile, dugSpot));
-            }
-
             isInDigPreview = false;
             digTilePreview.SetActive(false);
             currentDigTile = null;
             digPosition = Vector3.zero;
-        }   
+        }
     }
 
     private void UpdateDigPreview()
@@ -556,7 +564,9 @@ public class PlayerController : MonoBehaviour
         // Disable player input
         playerInput.actions.Disable();
 
-        Vector3 targetGroundLocation = CalculateGridPositionToCenterPlayer(digPosition, 1);
+        // TODO: Remove center on tile checks, no longer needed.
+
+        /*Vector3 targetGroundLocation = CalculateGridPositionToCenterPlayer(digPosition, 1);
         Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y - heightOffset, transform.position.z);
         if (Physics.Raycast(targetGroundLocation, Vector3.up, 1.0f, 6) || Physics.Raycast(transformPositionHeightOffset, transform.forward, 0.99f, 6))
         {
@@ -582,25 +592,6 @@ public class PlayerController : MonoBehaviour
                 }
                 else
                 {
-                    /*Vector3 lookVector;
-                    Debug.Log("Trying to move to target location: " + targetGroundLocation);
-                    while (Vector3.Distance(transform.position, targetGroundLocation) > 0.05f)
-                    {
-                        // Move player towards center of ground block they are standing on
-                        Vector3 tempVelocity = Vector3.MoveTowards(transform.position, targetGroundLocation, (speed / 2) * Time.deltaTime);
-                        playerAnimator.SetBool("isWalking", true);
-
-                        // Set rotation
-                        lookVector = tempVelocity - transform.position;
-                        transform.rotation = Quaternion.LookRotation(lookVector);
-                        transform.position = tempVelocity;
-                        yield return null;
-                    }
-
-                    transform.position = targetGroundLocation;
-                    lookVector = digPosition - transform.position;
-                    lookVector.y = 0;
-                    transform.rotation = Quaternion.LookRotation(lookVector);*/
                     playerAnimator.SetBool("isDigging", true);
                     playerAnimator.SetBool("isWalking", false);
 
@@ -646,7 +637,44 @@ public class PlayerController : MonoBehaviour
                 playerInput.actions.Enable();
                 yield return null;
             }
+        }*/
+
+        playerAnimator.SetBool("isDigging", true);
+        playerAnimator.SetBool("isWalking", false);
+
+        // Wait for dig animation to finish, currently has a placeholder for time
+        yield return new WaitForSeconds(0.5f);
+
+        // Set dug spot of hit ground tile to active;
+        dugSpot.SetActive(true);
+
+        // If the ground block has treasure, dig up the treasure
+        if (groundTileHit.tag == "GroundTreasure")
+        {
+            // Checks for GroundTreasure script
+            GroundTreasure groundTreasure;
+            if (groundTreasure = groundTileHit.GetComponent<GroundTreasure>())
+            {
+                // TODO: Change this to Physics.Linecast to shoot a ray towards a specific positon if the current implementation is not robust enough
+                // Calculates the target position to move the treasure chest to
+                // If there is an object in front of the player, move the treasure chest to the right of the player
+                // If there is an object to the right of the player, move the treasure chest to behind the player
+                Vector3 treasurePosition = groundTileHit.transform.position;
+                treasurePosition.y += 1;
+
+                // Calls the DigUpTreasure method on the ground treasure object
+                groundTreasure.DigUpTreasure(treasurePosition);
+            }
+            else
+            {
+                Debug.LogError("There is no GroundTreasure script on ground trasure object");
+            }
         }
+
+        playerAnimator.SetBool("isDigging", false);
+
+        // Enable player input
+        playerInput.actions.Enable();
     }
 
     /// <summary>
