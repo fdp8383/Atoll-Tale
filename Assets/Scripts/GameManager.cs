@@ -70,6 +70,8 @@ public class GameManager : MonoBehaviour
             pauseMenu = GameObject.Find("PauseMenu");
         }
 
+        // Lock mouse cursor to screen and hide the mouse cursor
+        Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = false;
     }
 
