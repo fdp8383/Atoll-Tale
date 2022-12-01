@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -38,6 +39,11 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     private Material dugMaterial;
+
+    [SerializeField]
+    private Slider swingChargeBar;
+    [SerializeField]
+    private Transform swingChargeBarCanvasTransform;
 
     [SerializeField]
     private float speed = 5f;
@@ -96,6 +102,8 @@ public class PlayerController : MonoBehaviour
     private float swingChargeTime = 0f;
     [SerializeField]
     private bool isChargingSwing = false;
+    [SerializeField]
+    private Vector3 swingChargeBarOffset = Vector3.zero;
 
     // Start is called before the first frame update
     private void Start()
@@ -123,6 +131,8 @@ public class PlayerController : MonoBehaviour
 
         // Set the player spawn point
         spawnPoint = transform.position;
+
+        swingChargeBar.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -145,6 +155,7 @@ public class PlayerController : MonoBehaviour
         if (isChargingSwing)
         {
             swingChargeTime += Time.deltaTime;
+            swingChargeBar.value = swingChargeTime;
 
             if (swingChargeTime >= 2.5f)
             {
@@ -157,6 +168,14 @@ public class PlayerController : MonoBehaviour
         {
             UpdateDigPreview();
         }
+    }
+
+    private void LateUpdate()
+    {
+        swingChargeBarCanvasTransform.LookAt(swingChargeBarCanvasTransform.position + Camera.main.transform.forward);
+        //Vector3 lookAtVector = Camera.main.transform.position; //swingChargeBarCanvasTransform.position + Camera.main.transform.forward;
+        //lookAtVector.y = 0f;
+        //swingChargeBarCanvasTransform.LookAt(lookAtVector);
     }
 
     /// <summary>
@@ -258,6 +277,8 @@ public class PlayerController : MonoBehaviour
             Debug.Log("Starting swing charge");
             isChargingSwing = true;
             playerAnimator.SetBool("isChargingSwing", true);
+            swingChargeBar.gameObject.SetActive(true);
+            swingChargeBar.value = 0.0f;
         }
         else
         {
@@ -377,6 +398,8 @@ public class PlayerController : MonoBehaviour
             StartCoroutine("SwingAction");
             isChargingSwing = false;
             swingChargeTime = 0f;
+            swingChargeBar.value = 0f;
+            swingChargeBar.gameObject.SetActive(false);
         }
     }
 
