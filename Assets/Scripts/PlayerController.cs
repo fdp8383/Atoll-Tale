@@ -860,7 +860,8 @@ public class PlayerController : MonoBehaviour
         }*/
         else if (other.gameObject.tag == "Ocean")
         {
-            gameManager.ResetPlayer();
+            Debug.Log("Hit ocean");
+            gameManager.UpdatePlayerHealth(-3);
         }
     }
 

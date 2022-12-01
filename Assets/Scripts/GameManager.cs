@@ -101,7 +101,10 @@ public class GameManager : MonoBehaviour
         if (playerHealth <= 0)
         {
             playerHealth = 0;
-            fullHearts[0].SetActive(false);
+            for (int i = 0; i < fullHearts.Count; i++)
+            {
+                fullHearts[i].SetActive(false);
+            }
             RestartLevelToLastCheckpoint();
         }
         else
