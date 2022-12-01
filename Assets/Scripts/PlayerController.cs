@@ -291,7 +291,7 @@ public class PlayerController : MonoBehaviour
                 // Perform a small/short raycast in front of the player first
                 RaycastHit hit;
                 Vector3 transformPositionHeightOffset = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
-                if (Physics.Raycast(transform.position, transform.forward, out hit, 0.99f))
+                if (Physics.Raycast(transform.position, transform.forward, out hit, 1.49f))
                 {
                     // Draws a ray for debugging
                     Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.yellow);

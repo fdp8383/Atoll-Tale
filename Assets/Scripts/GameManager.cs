@@ -126,7 +126,6 @@ public class GameManager : MonoBehaviour
             {
                 Debug.Log("Updating checkpoint: " + checkpoint.name);
                 currentCheckpointPosition = checkpoint.transform.position;
-                currentCheckpointPosition.y -= 0.5f;
                 foundCheckpointPositions.Add(checkpoint);
                 shovableObjectsMovedSinceLastCheckpoint.Clear();
             }

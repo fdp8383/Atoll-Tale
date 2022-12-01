@@ -29,7 +29,7 @@ public class Checkpoint : MonoBehaviour
             PlayerController player = other.GetComponent<PlayerController>();
             player.spawnPoint = transform.position;
             //player.spawnPoint.y = player.transform.position.y;
-            gameManager.UpdatePlayerCheckpoint(other.gameObject);
+            gameManager.UpdatePlayerCheckpoint(this.gameObject);
         }
     }
 }
