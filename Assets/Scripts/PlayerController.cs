@@ -24,8 +24,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private Animator playerAnimator;
 
-    [SerializeField]
-    private Vector3 spawnPoint;
+    public Vector3 spawnPoint;
 
     [SerializeField]
     private GameObject shovel;
@@ -853,12 +852,12 @@ public class PlayerController : MonoBehaviour
             GivePogostick();
         }
         // If the player collides with a checkpoint, update the player's current checkpoint
-        else if (other.gameObject.tag == "Checkpoint")
+        /*else if (other.gameObject.tag == "Checkpoint")
         {
             spawnPoint = other.transform.position;
             spawnPoint.y = transform.position.y;
             gameManager.UpdatePlayerCheckpoint(other.gameObject);
-        }
+        }*/
         else if (other.gameObject.tag == "Ocean")
         {
             gameManager.ResetPlayer();
