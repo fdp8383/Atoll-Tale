@@ -818,12 +818,6 @@ public class PlayerController : MonoBehaviour
         // Disable player input
         playerInput.actions.Disable();
 
-        isChargingSwing = false;
-        swingChargeTime = 0.0f;
-        playerAnimator.SetBool("isSwinging", false);
-        playerAnimator.SetBool("isChargingSwing", false);
-        playerAnimator.SetBool("isChargingSwingFull", false);
-
         rend.sharedMaterial = playerDamagedMaterial;
 
         // Stun player for passed in stun duration
@@ -831,8 +825,7 @@ public class PlayerController : MonoBehaviour
 
         rend.sharedMaterial = playerInvincibleMaterial;
 
-        // Enable player input
-        playerInput.actions.Enable();
+        ResetPlayer();
     }
 
     /// <summary>
@@ -1074,10 +1067,17 @@ public class PlayerController : MonoBehaviour
     {
         StopAllCoroutines();
         rend.sharedMaterial = playerMaterial;
-        startJump = isJumping = successfulJump = isInvulnerable = isChargingSwing = false;
+        startJump = isJumping = successfulJump = isInvulnerable = isChargingSwing = isInDigPreview = false;
         velocity = digPosition = Vector3.zero;
-        verticalVelocity = invulnerabilityDurationTimer = swingChargeTime = 0.0f;
+        verticalVelocity = invulnerabilityDurationTimer = swingChargeTime = swingChargeBar.value = 0.0f;
         currentInteractable = null;
+        swingChargeBar.gameObject.SetActive(false);
+        digTilePreview.SetActive(false);
+        playerAnimator.SetBool("isSwinging", false);
+        playerAnimator.SetBool("isChargingSwing", false);
+        playerAnimator.SetBool("isChargingSwingFull", false);
+        playerAnimator.SetBool("isDigging", false);
+        playerAnimator.SetBool("isWalking", false);
         playerInput.actions.Enable();
     }
 

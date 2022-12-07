@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
+using Cinemachine;
 
 public class GameManager : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private PlayerInput gameManagerInput;
+
+    [SerializeField]
+    private CinemachineInputProvider cameraInput;
 
     [SerializeField]
     private GameObject devToolsMenu;
@@ -68,6 +72,11 @@ public class GameManager : MonoBehaviour
         if (!pauseMenu)
         {
             pauseMenu = GameObject.Find("PauseMenu");
+        }
+
+        if (!cameraInput)
+        {
+            cameraInput = GameObject.Find("CMFreeLookCam").GetComponent<CinemachineInputProvider>();
         }
 
         // Lock mouse cursor to screen and hide the mouse cursor
@@ -230,13 +239,16 @@ public class GameManager : MonoBehaviour
         {
             Time.timeScale = 0.0f;
             playerController.DisablePlayerInput();
+            cameraInput.enabled = false;
             pauseMenu.SetActive(true);
             Cursor.visible = true;
         }
         else
         {
             Time.timeScale = 1.0f;
+            playerController.ResetPlayer();
             playerController.EnablePlayerInput();
+            cameraInput.enabled = true;
             pauseMenu.SetActive(false);
             Cursor.visible = devToolsMenu.activeInHierarchy;
         }
