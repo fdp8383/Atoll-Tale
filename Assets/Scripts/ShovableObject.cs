@@ -199,10 +199,15 @@ public class ShovableObject : MonoBehaviour
         RaycastHit hit;
         if (Physics.Linecast(new Vector3(transform.position.x, transform.position.y - 0.40f, transform.position.z), shoveTargetLocation, out hit))
         {
-            if (hit.collider.tag != "InvisibleBoundsWall" && hit.collider.tag != "Checkpoint")
+            if (hit.collider.tag != "InvisibleBoundsWall" && hit.collider.tag != "Checkpoint" && hit.collider.tag != "BreakableWall")
             {
                 Debug.Log("Cannot be shoved, there is an object in the way");
                 return;
+            }
+
+            if (hit.collider.tag == "BreakableWall")
+            {
+                hit.collider.gameObject.SetActive(false);
             }
         }
         // Do a longer second raycast that checks for ramps

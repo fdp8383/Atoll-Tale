@@ -19,6 +19,7 @@ TagManager:
   - GroundRamp
   - PlayerReflectionHitbox
   - Ocean
+  - BreakableWall
   layers:
   - Default
   - TransparentFX
