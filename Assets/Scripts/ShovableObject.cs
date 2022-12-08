@@ -220,6 +220,7 @@ public class ShovableObject : MonoBehaviour
             }
         }
 
+        SoundManager.PlaySound(SoundManager.Sound.stoneSliding);
         beingShoved = true;
         distanceToTravel = distance;
         this.beingChargedShoved = beingChargedShoved;

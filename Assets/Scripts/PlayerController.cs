@@ -335,6 +335,7 @@ public class PlayerController : MonoBehaviour
                         if (!enemyBehavior.isStunned)
                         {
                             enemyBehavior.StartCoroutine("StunEnemy");
+                            SoundManager.PlaySound(SoundManager.Sound.clang);
                         }
                     }
                 }
@@ -385,6 +386,7 @@ public class PlayerController : MonoBehaviour
                         if (!enemyBehavior.isStunned)
                         {
                             enemyBehavior.StartCoroutine("StunEnemy");
+                            SoundManager.PlaySound(SoundManager.Sound.clang);
                         }
                     }
                 }
@@ -438,7 +440,7 @@ public class PlayerController : MonoBehaviour
         // Disable player input
         playerInput.actions.Disable();
 
-        // TODO: Start shove animation when animation is imported and implemented
+        SoundManager.PlaySound(SoundManager.Sound.clang);
 
         // Wait for shove animation to finish, currently has a placeholder for time
         yield return new WaitForSeconds(0.5f);
@@ -464,6 +466,7 @@ public class PlayerController : MonoBehaviour
             // And the interactable object has not been interacted with already
             if (!currentInteractable.GetHasBeenInteracted())
             {
+                SoundManager.PlaySound(SoundManager.Sound.startGame);
                 // Call the interactable object's interaction method
                 currentInteractable.DoInteraction();
                 currentInteractable = null;
@@ -664,6 +667,8 @@ public class PlayerController : MonoBehaviour
         playerAnimator.SetBool("isDigging", true);
         playerAnimator.SetBool("isWalking", false);
 
+        SoundManager.PlaySound(SoundManager.Sound.dig);
+
         // Wait for dig animation to finish, currently has a placeholder for time
         yield return new WaitForSeconds(0.5f);
 
@@ -746,6 +751,8 @@ public class PlayerController : MonoBehaviour
         // Hide shovel, show pogo stick
         shovel.SetActive(false);
         pogoStick.SetActive(true);
+
+        SoundManager.PlaySound(SoundManager.Sound.jump);
 
         // Calculate the vertical velocity needed to reach target jump height
         float jumpHeight = 1.3f;

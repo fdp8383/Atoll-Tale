@@ -12,12 +12,22 @@ public static class SoundManager
         stepOne,
         stepTwo,
         jump,
+        stoneSliding,
+        treeBreeze,
+        oceanWaves,
+        menuMusic,
+        gameMusic,
+        startGame,
+        clickButton,
+        clickBack,
+        quitGame
     }
 
     public static void PlaySound(Sound sound)
     {
         GameObject soundGO = new GameObject("Sound");
         AudioSource audioSource = soundGO.AddComponent<AudioSource>();
+        audioSource.volume = GameObject.Find("GameAssets").GetComponent<GameAssets>().soundVolume;
         audioSource.PlayOneShot(GetAudioClip(sound));
     }
 
