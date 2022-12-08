@@ -26,6 +26,7 @@ public class MainMenu : MonoBehaviour
     {
         SoundManager.PlaySound(SoundManager.Sound.startGame);
         yield return new WaitForSeconds(1.9f);
+        GameObject.Find("GameAssets").GetComponent<GameAssets>().PlayGameSong();
         SceneManager.LoadScene("MainScene");
     }
 
@@ -51,6 +52,7 @@ public class MainMenu : MonoBehaviour
     {
         SoundManager.PlaySound(SoundManager.Sound.clickBack);
         yield return new WaitForSeconds(0.8f);
+        GameObject.Find("GameAssets").GetComponent<GameAssets>().PlayMenuSong();
         SceneManager.LoadScene("MainMenu");
     }
 

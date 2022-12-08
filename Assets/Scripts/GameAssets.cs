@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameAssets : MonoBehaviour
 {
@@ -46,22 +47,7 @@ public class GameAssets : MonoBehaviour
 
     public void Start()
     {
-        if (!soundSlider)
-        {
-            soundSlider = GameObject.Find("SoundsSlider").GetComponent<Slider>();
-        }
-        soundSlider.value = soundVolume;
-
-        if (!musicSlider)
-        {
-            musicSlider = GameObject.Find("MusicSlider").GetComponent<Slider>();
-        }
-        musicSlider.value = musicVolume;
-
-        soundSlider.onValueChanged.AddListener(delegate { SoundSliderChangeCheck(); });
-        musicSlider.onValueChanged.AddListener(delegate { MusicSliderChangeCheck(); });
-
-        GameObject.Find("SettingsMenu").SetActive(false);
+        
     }
 
     public void SoundSliderChangeCheck()
@@ -85,6 +71,11 @@ public class GameAssets : MonoBehaviour
 
     private void Update()
     {
+        if (SceneManager.GetActiveScene().name == "PreloadScene")
+        {
+            return;
+        }
+
         if (!soundSlider)
         {
             soundSlider = GameObject.Find("SoundsSlider").GetComponent<Slider>();
@@ -97,8 +88,27 @@ public class GameAssets : MonoBehaviour
             musicSlider = GameObject.Find("MusicSlider").GetComponent<Slider>();
             musicSlider.value = musicVolume;
             musicSlider.onValueChanged.AddListener(delegate { MusicSliderChangeCheck(); });
-            GameObject.Find("SettingsMenu").SetActive(false);
-            GameObject.Find("PauseMenu").SetActive(false);
+            if (SceneManager.GetActiveScene().name == "MainMenu")
+            {
+                GameObject.Find("SettingsMenu").SetActive(false);
+            }
+            else
+            {
+                GameObject.Find("SettingsMenu").SetActive(false);
+                GameObject.Find("PauseMenu").SetActive(false);
+            }
         }
+    }
+
+    public void PlayGameSong()
+    {
+        menuMusic.Stop();
+        gameMusic.Play();
+    }
+
+    public void PlayMenuSong()
+    {
+        gameMusic.Stop();
+        menuMusic.Play();
     }
 }
