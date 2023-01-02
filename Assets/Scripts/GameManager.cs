@@ -9,9 +9,15 @@ public class GameManager : MonoBehaviour
 {
     public int playerGold;
 
+    public int chestsFound = 0;
+
+    public int playerDeaths = 0;
+
     public int playerHealth;
 
     public bool isGamePaused = false;
+
+    private bool isLevelWon = false;
 
     [SerializeField]
     private PlayerInput gameManagerInput;
@@ -24,6 +30,12 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private GameObject pauseMenu;
+
+    [SerializeField]
+    private GameObject winMenu;
+
+    [SerializeField]
+    private TextMeshProUGUI winMenuText; 
 
     [SerializeField]
     private TextMeshProUGUI cointText;
@@ -53,6 +65,9 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         Time.timeScale = 1.0f;
+        isLevelWon = false;
+        chestsFound = 0;
+        playerDeaths = 0;
 
         // Get reference to player controller script if not set in editor
         if (!playerController)
@@ -72,6 +87,11 @@ public class GameManager : MonoBehaviour
         if (!pauseMenu)
         {
             pauseMenu = GameObject.Find("PauseMenu");
+        }
+
+        if (!winMenu)
+        {
+            winMenu = GameObject.Find("WinMenu");
         }
 
         if (!cameraInput)
@@ -98,6 +118,14 @@ public class GameManager : MonoBehaviour
     {
         playerGold += goldToAdd;
         cointText.text = "x " + playerGold;
+    }
+
+    /// <summary>
+    /// Adds to the player's chest found count
+    /// </summary>
+    public void AddToPlayerChestsFound()
+    {
+        chestsFound += 1;
     }
 
     /// <summary>
@@ -157,6 +185,7 @@ public class GameManager : MonoBehaviour
         {
             playerGold -= 1;
         }
+        playerDeaths += 1;
     }
 
     /// <summary>
@@ -224,8 +253,10 @@ public class GameManager : MonoBehaviour
     /// <param name="value"></param>
     private void OnDevTool(InputValue value)
     {
-        devToolsMenu.SetActive(!devToolsMenu.activeInHierarchy);
+        // comment out for final build
+        /*devToolsMenu.SetActive(!devToolsMenu.activeInHierarchy);
         Cursor.visible = devToolsMenu.activeInHierarchy;
+        */
     }
 
     /// <summary>
@@ -234,14 +265,15 @@ public class GameManager : MonoBehaviour
     /// <param name="value"></param>
     private void OnPause(InputValue value)
     {
+        if (isLevelWon)
+        {
+            return;
+        }
+
         isGamePaused = !isGamePaused;
         if (isGamePaused)
         {
-            Time.timeScale = 0.0f;
-            playerController.DisablePlayerInput();
-            cameraInput.enabled = false;
-            pauseMenu.SetActive(true);
-            Cursor.visible = true;
+            PauseGame();
         }
         else
         {
@@ -252,6 +284,29 @@ public class GameManager : MonoBehaviour
             pauseMenu.SetActive(false);
             Cursor.visible = devToolsMenu.activeInHierarchy;
         }
+    }
+
+    public void PauseGame()
+    {
+        Time.timeScale = 0.0f;
+        playerController.DisablePlayerInput();
+        cameraInput.enabled = false;
+        pauseMenu.SetActive(true);
+        Cursor.visible = true;
+    }
+
+    public void WinLevel()
+    {
+        Time.timeScale = 0.0f;
+        playerController.DisablePlayerInput();
+        cameraInput.enabled = false;
+        Cursor.visible = true;
+        isLevelWon = true;
+        winMenu.SetActive(true);
+        winMenuText.text = "Thanks for playing!\n" +
+                           "Treasure chests found: " + chestsFound +  "/8\n" +
+                           "Deaths: " + playerDeaths + "\n" +
+                           "Gold collected: " + playerGold;
     }
 
     /// <summary>

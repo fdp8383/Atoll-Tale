@@ -50,7 +50,7 @@ public class GroundTreasure : MonoBehaviour
     {
         treasureSpot.SetActive(false);
         interactableTreasure.SetActive(true);
-        if (interactableTreasure.name == "InteractableTreasureChest")
+        if (interactableTreasure.name == "InteractableTreasureChest" || interactableTreasure.name == "InteractableTreasureChestFinal")
         {
             interactableTreasure.transform.position = treasurePosition;
         }

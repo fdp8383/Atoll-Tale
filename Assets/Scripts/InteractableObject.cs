@@ -55,6 +55,14 @@ public class InteractableObject : MonoBehaviour
         if (gameObject.name == "InteractableTreasureChest")
         {
             gameManager.AddToPlayerGold(1);
+            gameManager.AddToPlayerChestsFound();
+            gameObject.SetActive(false);
+        }
+        else if (gameObject.name == "InteractableTreasureChestFinal")
+        {
+            gameManager.AddToPlayerGold(1);
+            gameManager.AddToPlayerChestsFound();
+            gameManager.WinLevel();
             gameObject.SetActive(false);
         }
         // Otherwise change the material to the interacted material placeholder
